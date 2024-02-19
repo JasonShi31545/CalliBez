@@ -1,10 +1,5 @@
 #include "bezier.h"
 
-#define W_WIDTH 1200
-#define W_HEIGHT 700
-#define FPS 140
-#define FTT (1000 / FPS)
-
 SDL_Window *initialize_window(const char *title) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "Error initialising SDL\n");
@@ -50,9 +45,16 @@ void destroy(SDL_Window *w, SDL_Renderer *r) {
     SDL_Quit();
 }
 
+
+float t_;
+
 int main(int argc, const char *argv[]) {
     using namespace std;
 
+    t_ = 0.0f;
+    vector<Point> *points_plotted = new vector<Point>();
+    unique_ptr<vector<Point>> pp(points_plotted);
+    points_plotted = nullptr;
 
     int last_frame_time = SDL_GetTicks();
 
@@ -64,7 +66,6 @@ int main(int argc, const char *argv[]) {
     SDL_Texture *t;
 
     assert(initialize_frame(&w,&r,&s,&t) == 0);
-
     bool running = true;
 
 
@@ -84,6 +85,8 @@ int main(int argc, const char *argv[]) {
                 break;
         }
 
+        SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
+
         SDL_RenderClear(r);
 
         // UPDATE
@@ -96,12 +99,38 @@ int main(int argc, const char *argv[]) {
         float delta_time = (SDL_GetTicks() - last_frame_time);
         last_frame_time = SDL_GetTicks();
 
-
-        std::cerr << "Delta time: " << delta_time << std::endl;
-        std::cerr << "Time: " << SDL_GetTicks() << std::endl;
-
+        t_ = last_frame_time - 280;
+        t_ = TimeTransform(t_);
+        // std::cerr << "Delta time: " << delta_time << std::endl;
+        // std::cerr << "Time: " << SDL_GetTicks() << std::endl;
 
         // Render
+
+        SDL_SetRenderDrawColor(r, 255, 200, 50, 255);
+
+
+        // printf("%f\n", t_);
+
+        Point a,b,c,d;
+        a = Point(100,100);
+        d = Point(500, 100);
+        b = Point(180, 300);
+        c = Point(400, 20);
+
+        DrawPoint(r, a);
+        DrawPoint(r, b);
+        DrawPoint(r, c);
+        DrawPoint(r, d);
+
+
+        Point f = BersteinCubicSpline(a,b,c,d,t_);
+
+        for (size_t i = 0; i < (*pp).size(); i++) {
+            DrawPoint(r, (*pp)[i]);
+        }
+        DrawPoint(r, f);
+        (*pp).push_back(f);
+
 
         SDL_RenderPresent(r);
 
