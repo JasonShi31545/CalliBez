@@ -140,6 +140,7 @@ float Radius(Point p0, Point p1, Point p2, Point p3, float t) {
 }
 
 unsigned int factorial(unsigned int n) {
+    if (n == 0) return 1;
     for (int i = n-1; i >= 1; i--) {
         n *= i;
     }
