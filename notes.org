@@ -1,0 +1,211 @@
+#+title: Bézier Curve
+#+OPTIONS: tex:t
+
+\pagebreak
+
+An $n$ degree Bézier curve is defined using $n+1$ control points.
+Translations can be easily applied to control points
+
+E.g.
+
+Quadratic Bézier Curve:
+
+$Q_0$ and $Q_1$ lie on the lies $P_0 \to P_1$ and $P_1 \to P_2$
+
+$$Q_0 = (1-t)P_0 + tP_1$$
+$$Q_1 = (1-t)P_1 + tP_2$$
+
+This process is known as LERP.
+
+$C(t)$ is a point on the Bezier curve on the line $Q_0 \to Q_1$
+
+
+$$C(t) = (1-t)Q_0 + tQ_1$$
+
+Combining:
+
+$$C(t) = (1-t)^2P_0 + (1-t)tP_1 + t(1-t)P_1 + t^2P_2$$
+$$C(t) = (1-t)^2P_0 + 2(1-t)tP_1 + t^2P_2$$
+
+* de Casteljau's algorithm
+
+Let $P_{i,j}$ denote the control points where $P_{i,0}$ are the original control points $P_0$ to $P_2$, $P_{i,1}$ are the points $Q_0$ to $Q_1$ and $P_{0,2}$ is $C(t)$ then:
+
+$$P_{i,j} = (1-t)P_{i,j-1} + tP_{i+1, j-1}$$
+
+
+$j$ is the levels. So when $j$ is $n-1$ we are at the curves, when $j=0$ we are at the control points.
+
+$P_{i,j}$ depends on the points $P_{i, j-1}$ and $P_{i+1, j-1}$.
+
+[[./visual1.png]]
+
+So for example:
+$$P_{0,3} = (1-t)^3P_{0,0} + 3t(1-t)^2 P_{1,0} + 3t^2(1-t)P_{2,0} + t^3P_{3,0}$$
+
+[[./visual2.png]]
+
+
+So the general form of a degree $n$ Bézier curve defined by the cotnrol points $P_i$ (where $i = 0,1,...,n$) is:
+
+$$C(t) = \sum_{i=0}^{n}{b_{i,n}(t)P_i}$$
+where $b_{i,n}(t)$ are called Bernstein polynomials that are defined using:
+
+$$b_{i,n}(t) = {n \choose i} t^i (1-t)^{n-i}$$
+and ${n \choose i}$ is the Binomial coefficient.
+
+In this case $n$ denotes the degree of the curve, and $i$ denotes the coefficient for each control point to get to the curve
+
+e.g. Quadratic Bernstein Polynomial ($b_{i,2}$)
+[[./visual3.png]]
+
+
+To save computational effort, Bézier curves are precalculated and expressed matrix form as follows:
+
+\begin{equation*}
+
+C(t) = \begin{pmatrix}
+P_0 & P_1 & ... & P_{n-1} & P_n
+\end{pmatrix} \cdot M \cdot \begin{pmatrix}
+t^n \\ t^{n-1} \\ ... \\ t \\ 1
+\end{pmatrix}
+
+\end{equation*}
+where $M$ is an $(n+1) \times (n+1)$ matrix.
+
+In case of a quadratic Bézier curve, $M$ is:
+
+\begin{equation*}
+\begin{pmatrix}
+1 & -2 & 1 \\ -2 & 2 & 0 \\ 1 & 0 & 0
+\end{pmatrix}
+\end{equation*}
+
+
+So to calculate the curve formula, we take the control points for an $n$ degree Bézier curve (we choose $n$), and we calculate $M$ and then perform the matrix product.
+
+* Properties of Bézier curves:
+
+** Curve begins at $P_0$ and ends at $P_1$
+
+** Is a straight line if a straight line can be drawn through the control points
+
+** Start and end of a Bézier curve is tangential to the start and end of the control polygon
+
+[[./visual4.png]]
+
+** A Bèzier curve can be split into two Bézier curves
+
+** A Bézier curve is contained within its control polygon. This is known as the **Convex Hull Property**
+
+Cubic Bézier curves are the most common.
+
+* Derivatives
+** The derivative of a nth degree Bézier curve is always another Bézier curve with $n-1$ degree
+** The derivative is tangent to the curve, if we normalise it, we get the tangent to the curve at $t$ and the normal to the curve at $t$. We can get coordinate offsets to get line width variations, we can even use another curve for the variations to create swell strokes.
+** Using the "velocity" and "acceleration" (1st and 2nd derivatives), we can calculate the curvature.
+
+
+
+$$\kappa = \frac{det(P', P'')}{\left\|P'\right\|^3}$$
+
+
+** We can calculate the radius of an oscillating circle using this curvature calculation
+
+
+
+$$r = \kappa^{-1}$$
+
+*BTW the Golden ellipse:*
+
+[[./golden_ellipse.png]]
+
+Derivatives of Berstein Polynomial in matrix form:
+
+[[./visual7.png]]
+
+
+** SPLINES
+
+
+Cubic Bézier has four points, we expand the LERPS from the De Casteljau's Algorithm to a Bernstein polynomial. The $M$ matrix is called *Characteristic Matrix*.
+
+Bézier curves generalise to any number of points. But we don't have local control as each point affects the entire curve. Higher degree Bézier curves are not good for this purpose.
+
+Cubic Bézier curves combine together to create a Bézier spline.
+
+So if we join a bunch of cubic curves head-to-tail, we can have $u$ which has an integer part denoting which curve we are one, and the decimal parts denoting the local $t$ value.
+
+
+The head-to-tail connections are called "Joins/Knots".
+
+[[./visual5.png]]
+
+It's interpolating every 3rd point.
+
+*3 configurations:*
+[[./visual6.png]]
+
+
+Broken is where the tangent points have no clear relations, creating a sharp edge.
+
+Aligned creates a continuous curve, but they might not have the same distance to the knot.
+
+Mirror has the same distance to the knot.
+
+
+*** Continuity
+
+$C^0$ continuous means that even though the curve is connected, the 1st derivatives are piecewise.
+
+Mirroring them makes the 1st derivative continuous, making it $C^1$ continuous.
+
+You can't have cubic Bézier $C^2$ continuous without losing controls.
+
+The joins between 2 cubic Bézier curves are $C^n$ continuous if:
+
+$$A^{(i)}(t_{end}) = B^{(i)}(t_{start})$$ for $i$ in $[0,n]$
+
+This is what's called Parametric Continuity
+
+
+*** Aligned tangent points (Geometric continuity)
+
+If the aligned tangent points exist at a join, it is $G^1$ continuous, because we can normalise 1st derivative (normalist velocity vector $P'(u)/\left\|P'(u)\right\|$), the change in speed has no effect on the geometry continuity.
+
+$G^2$ continuity is important in industrial design.
+There's $G^3$ also.
+
+Geometric continuity def:
+
+$A(t)$ and $B(t)$ are $G^n$ continuous if a function $g(t)$ exists so that $A(t)$ and $B(g(t))$ are $C^n$ continuous.
+
+*** Summary
+
+[[./visual8.png]]
+
+where arrows indicate dependency on the continuity.
+
+
+[[./visual9.png]]
+
+** Lots of Shitty Splines
+
+
+[[./visual10.png]]
+[[./visual11.png]]
+
+** Rational Bézier Curves
+
+The rational Bézier curve adds adjustable weights to provide closer approximations to arbitrary shapes. The numerator is a weighted Bernstein-form Bézier curve and the denominator is a weighted sum of Bernstein polynomials. Rational Bézier curves can, among other uses, be used to represent segments of conic sections exactly, including circular arcs.
+
+Given $n+1$ control points, the rational Bézier curve can be described by:
+
+$$B(t) = \frac{\sum_{i=0}^{n} {b_{i,n}(t) P_i w_i}}{\sum_{i=0}^{n} {b_{i,n}(t) w_i}}$$
+
+or simply:
+
+$$B(t) = \frac{\sum_{i=0}^{n} {{n \choose i} t^i (1-t)^{n-i} P_i w_i}}{\sum_{i=0}^{n} {{n \choose i} t^i (1-t)^{n-i} w_i}}$$
+
+** Non-Uniform rational B-splines
+[[https://en.wikipedia.org/wiki/Non-uniform_rational_B-spline]]
