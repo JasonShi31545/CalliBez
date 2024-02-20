@@ -52,9 +52,16 @@ int main(int argc, const char *argv[]) {
     using namespace std;
 
     t_ = 0.0f;
-    vector<Point> *points_plotted = new vector<Point>();
-    unique_ptr<vector<Point>> pp(points_plotted);
-    points_plotted = nullptr;
+
+    PixelGrid *grid = new vector<vector<uint32_t>> ();
+    grid->resize(W_WIDTH);
+    for (size_t i = 0 ; i < W_WIDTH; i++) {
+        (*grid)[i].resize(W_HEIGHT);
+        for (size_t j = 0; j < W_HEIGHT; j++) {
+            (*grid)[i][j] = (uint32_t)0;
+        }
+    }
+
 
     int last_frame_time = SDL_GetTicks();
 
@@ -96,7 +103,7 @@ int main(int argc, const char *argv[]) {
             SDL_Delay(time_to_wait);
         }
         // this is cool
-        float delta_time = (SDL_GetTicks() - last_frame_time);
+        // float delta_time = (SDL_GetTicks() - last_frame_time);
         last_frame_time = SDL_GetTicks();
 
         t_ = last_frame_time - 280;
@@ -106,8 +113,26 @@ int main(int argc, const char *argv[]) {
 
         // Render
 
-        SDL_SetRenderDrawColor(r, 255, 200, 50, 255);
+        // SDL_SetRenderDrawColor(r, 255, 200, 50, 255);
 
+        for (int i = 0; i < W_WIDTH; i++) {
+            for (int j = 0; j < W_HEIGHT; j++) {
+                uint32_t pixel_val = (*grid)[i][j];
+                if (pixel_val != (uint32_t)0) {
+                    // top byte is r, then g, then b, then the bottom is a
+
+                    Uint8 red,g,b,a;
+                    red = (Uint8)((pixel_val & 0xFF000000) >> 24U);
+                    g = (Uint8)((pixel_val & 0x00FF0000) >> 16U);
+                    b = (Uint8)((pixel_val & 0x0000FF00) >> 8U);
+                    a = (Uint8)((pixel_val & 0x000000FF) >> 0U);
+
+                    SDL_SetRenderDrawColor(r, red, g, b, a);
+                    SDL_RenderDrawPoint(r, i, j);
+                }
+            }
+        }
+        SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
 
         // printf("%f\n", t_);
 
@@ -117,19 +142,26 @@ int main(int argc, const char *argv[]) {
         b = Point(180, 300);
         c = Point(400, 20);
 
-        DrawPoint(r, a);
-        DrawPoint(r, b);
-        DrawPoint(r, c);
-        DrawPoint(r, d);
+        DrawPoint((*grid), a);
+        DrawPoint((*grid), b);
+        DrawPoint((*grid), c);
+        DrawPoint((*grid), d);
 
 
         Point f = BersteinCubicSpline(a,b,c,d,t_);
+        Vector2 v = BersteinCubicVelocity(a, b, c, d, t_);
 
-        for (size_t i = 0; i < (*pp).size(); i++) {
-            DrawPoint(r, (*pp)[i]);
-        }
-        DrawPoint(r, f);
-        (*pp).push_back(f);
+
+        Point w1, w2, w3, w4;
+        w1 = Point(0,0);
+        w2 = Point(100,100);
+        w3 = Point(200,100);
+        w4 = Point(300,0);
+
+        Point w = BersteinCubicSpline(w1, w2, w3, w4, t_);
+
+        // DrawPoint(r, f);
+        DrawWidth((*grid), f, v, (1.0f/20.0f)*w.y);
 
 
         SDL_RenderPresent(r);
@@ -137,6 +169,7 @@ int main(int argc, const char *argv[]) {
     }
 
     destroy(w,r);
+    delete grid;
 
     return 0;
 }

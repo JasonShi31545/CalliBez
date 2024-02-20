@@ -6,7 +6,16 @@ float Vector2::magnitude() {
 
 float TimeTransform(float t) {
 //    return (1 - expf(-0.05f * t));
-    return (1 - expf(-0.0005f * t));
+//    return (1 - expf(-0.00005f * t));
+
+    float val = t/(10000.0f);
+    if (val <= 0.0f) {
+        return 0.0f;
+    } else if (val >= 1.0f) {
+        return 1.0f;
+    } else {
+        return val;
+    }
 }
 
 
@@ -18,27 +27,38 @@ Point lerp(Point s, Point e, float t) {
     return Point(x,y);
 }
 
-void DrawPoint(SDL_Renderer *r, Point p) {
-    SDL_RenderDrawPointF(r, p.x, W_HEIGHT - p.y);
+void DrawPoint(PixelGrid &g, Point p) {
+    // SDL_RenderDrawPointF(r, p.x, W_HEIGHT - p.y)
+    g[roundf(p.x)][W_HEIGHT - roundf(p.y)] = (uint32_t)0xFFFFFFFF;
 }
 
-void DrawLine(SDL_Renderer *r, Point s, Point e) {
-    SDL_RenderDrawLineF(r, s.x, W_HEIGHT - s.y, e.x, W_HEIGHT - e.y);
+void DrawLine(PixelGrid &g, Point s, Point e) {
+    // SDL_RenderDrawLineF(r, s.x, W_HEIGHT - s.y, e.x, W_HEIGHT - e.y);
+    const float epsilon = 0.01f;
+    for (float t = 0; t <= 1.0f; t += epsilon) {
+        Point p = lerp(s,e,t);
+        DrawPoint(g, p);
+    }
 }
 
 
-void DrawCircle(SDL_Renderer *r, Point o, float radius) {
+void DrawCircle(PixelGrid &g, Point o, float radius) {
     float x,y;
     for (float t = 0.0f; t <= 2*M_PI; t += 0.01f) {
         x = radius*cosf(t) + o.x;
         y = radius*sinf(t) + o.y;
-        DrawPoint(r, Point(x,y));
+        // DrawPoint(r, Point(x,y));
+        DrawPoint(g, Point(x,y));
     }
 }
 
-void DrawWidth(SDL_Renderer *r, Point o, Vector2 v, float w) {
+void DrawWidth(PixelGrid &g, Point o, Vector2 v, float w) {
+
     // v for velocity vector
     // w for width
+    if (w <= 0.0f) {
+        w = 0.5f;
+    }
     Vector2 nn = NormalizeV2(NormalV2(v)); // normalised normal
     const float epsilon = 0.0007f; // width resolution
     for (float ae = 0.0f; ae <= w/2; ae += epsilon) {
@@ -52,8 +72,10 @@ void DrawWidth(SDL_Renderer *r, Point o, Vector2 v, float w) {
         float x2 = o.x + ae;
         float y1 = func(x1);
         float y2 = func(x2);
-        DrawPoint(r, Point(x1, y1));
-        DrawPoint(r, Point(x2, y2));
+        // DrawPoint(r, Point(x1, y1));
+        DrawPoint(g, Point(x1,y1));
+        // DrawPoint(r, Point(x2, y2));
+        DrawPoint(g, Point(x2,y2));
     }
 }
 
@@ -122,7 +144,7 @@ float BersteinCoefficient(unsigned int n, unsigned int i, float t) {
 Point BezierCurveUnweightedN(unsigned int n, std::vector<Point> points, float t) {
     assert(points.size() == n+1);
     float resx = 0, resy = 0;
-    for (int i = 0; i <= n; i++) {
+    for (unsigned int i = 0; i <= n; i++) {
         resx += BersteinCoefficient(n, i, t) * points[i].x;
         resy += BersteinCoefficient(n, i, t) * points[i].y;
     }
@@ -133,7 +155,7 @@ Point BezierCurveWeightedN(unsigned int n, std::vector<Point> points, std::vecto
     assert(points.size() == n+1);
     assert(weights.size() == n+1);
     float resx = 0, resy = 0;
-    for (int i = 0; i <= n; i++) {
+    for (unsigned int i = 0; i <= n; i++) {
         resx += BersteinCoefficient(n, i, t) * points[i].x * weights[i];
         resy += BersteinCoefficient(n, i, t) * points[i].y * weights[i];
     }
@@ -145,7 +167,7 @@ Point BezierCurveRationalWeighted(unsigned int n, std::vector<Point> points, std
     assert(weights.size() == n+1);
     float resx = 0, resy = 0;
     float den = 0;
-    for (int i = 0; i <= n; i++) {
+    for (unsigned int i = 0; i <= n; i++) {
         float bc = BersteinCoefficient(n, i, t) * weights[i];
         den += bc;
         resx += den * points[i].x;
