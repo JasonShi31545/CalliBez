@@ -1,7 +1,7 @@
 #include "bezier.h"
 
 float Vector2::magnitude() {
-    return sqrtf(x*x, y*y);
+    return sqrtf(x*x + y*y);
 }
 
 float TimeTransform(float t) {
@@ -27,11 +27,11 @@ void DrawLine(SDL_Renderer *r, Point s, Point e) {
 }
 
 
-void DrawCircle(SDL_Renderer *r, Point o, float r) {
+void DrawCircle(SDL_Renderer *r, Point o, float radius) {
     float x,y;
     for (float t = 0.0f; t <= 2*M_PI; t += 0.01f) {
-        x = r*cosf(t) + o.x;
-        y = r*sinf(t) + o.y;
+        x = radius*cosf(t) + o.x;
+        y = radius*sinf(t) + o.y;
         DrawPoint(r, Point(x,y));
     }
 }
@@ -45,15 +45,15 @@ void DrawWidth(SDL_Renderer *r, Point o, Vector2 v, float w) {
         // ae: accumulated epsilon
         // w/2 as symmetrical
         float m = nn.y / nn.x;
-        float (*func)(float) = [&m, &o](float x) {
+        auto func = [&m, &o](float x)  {
             return m*x - o.x * m + o.y;
         };
         float x1 = o.x - ae;
         float x2 = o.x + ae;
         float y1 = func(x1);
         float y2 = func(x2);
-        DrawPoint(x1, y1);
-        DrawPoint(x2, y2);
+        DrawPoint(r, Point(x1, y1));
+        DrawPoint(r, Point(x2, y2));
     }
 }
 

@@ -81,7 +81,7 @@ float TimeTransform(float t);
 Point lerp(Point s, Point e, float t);
 void DrawPoint(SDL_Renderer *r, Point p);
 void DrawLine(SDL_Renderer *r, Point s, Point e);
-void DrawCircle(SDL_Renderer *r, Point o, float r);
+void DrawCircle(SDL_Renderer *r, Point o, float radius);
 void DrawWidth(SDL_Renderer *r, Point o, Vector2 v);
 Point BersteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t);
 Vector2 BersteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t);
