@@ -34,3 +34,10 @@
 
 # Custom
 .*.~undo-tree~
+*.png
+*.ggb
+*.nb
+*.tex
+*.out
+*.pdf
+*.pptx

@@ -9,6 +9,6 @@ CPPFLAGS=-std=c++17 -Wall -Wpedantic -g -fsanitize=address -fsanitize=undefined 
 LIBS=-lSDL2 -lm
 
 %: %.cc
-	$(CC) $(CPPFLAGS) $(LIBS) $< -o $@
+	$(CC) $(CPPFLAGS) $(LIBS) $< -o $@.out
 
 # end
