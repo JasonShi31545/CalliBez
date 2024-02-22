@@ -43,3 +43,8 @@
 *.pptx
 *.svg
 *.jpg
+
+# Custom directories
+bcurves/
+rose-hulman-notes/
+python_tests/

@@ -1,7 +1,69 @@
 #include "bezier.h"
 
+// Vectors and Matrices
+
 float Vector2::magnitude() {
     return sqrtf(x*x + y*y);
+}
+
+float Vector3::magnitude() {
+    return sqrtf(x*x + y*y + z*z);
+}
+std::vector<std::vector<float>> Matrix2::getVectorForm() {
+    return iv;
+}
+std::vector<std::vector<float>> Matrix3::getVectorForm() {
+    return iv;
+}
+
+float dot(Vector2 a, Vector2 b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+float dot(Vector3 a, Vector3 b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+Vector2 dot(Matrix2 m, Vector2 v) {
+    float a,b,c,d,x,y;
+    a = m.get(0, 0);
+    b = m.get(0, 1);
+    c = m.get(1, 0);
+    d = m.get(1, 1);
+    x = v.x;
+    y = v.y;
+    return Vector2(a*x+b*y, c*x+d*y);
+}
+
+Vector3 dot(Matrix3 m, Vector3 v) {
+    std::vector<float> res(3,0);
+    for (int i = 0; i < 3; i++) { // row
+        for (int j = 0; j < 3; j++) { // column
+            float n = m.get(i,j);
+            res[i] += n * v[i];
+        }
+    }
+    return Vector3(res);
+}
+
+Matrix2 dot(Matrix2 m1, Matrix2 m2) {
+    Matrix2 res{};
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            res.set(i,j, dot(m1.getRow(i), m2.getColumn(j)));
+        }
+    }
+    return res;
+}
+
+Matrix3 dot(Matrix3 m1, Matrix3 m2) {
+    Matrix3 res{};
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            res.set(i,j, dot(m1.getRow(i), m2.getColumn(j)));
+        }
+    }
+    return res;
 }
 
 float TimeTransform(float t) {
@@ -29,7 +91,10 @@ Point lerp(Point s, Point e, float t) {
 
 void DrawPoint(PixelGrid &g, Point p) {
     // SDL_RenderDrawPointF(r, p.x, W_HEIGHT - p.y)
-    g[roundf(p.x)][W_HEIGHT - roundf(p.y)] = (uint32_t)0xFFFFFFFF;
+    int rx = roundf(p.x);
+    int ry = W_HEIGHT - round(p.y);
+    if (rx < 0 || rx > W_WIDTH || ry < 0 || ry > W_HEIGHT) return;
+    g[rx][ry] = (uint32_t)0xFFFFFFFF;
 }
 
 void DrawLine(PixelGrid &g, Point s, Point e) {
@@ -170,8 +235,8 @@ Point BezierCurveRationalWeighted(unsigned int n, std::vector<Point> points, std
     for (unsigned int i = 0; i <= n; i++) {
         float bc = BersteinCoefficient(n, i, t) * weights[i];
         den += bc;
-        resx += den * points[i].x;
-        resy += den * points[i].y;
+        resx += bc * points[i].x;
+        resy += bc * points[i].y;
     }
     resx /= den;
     resy /= den;
@@ -200,3 +265,9 @@ Vector2 RotateV2(Vector2 v, float angle) {
 Vector2 NormalV2(Vector2 v) {
     return Vector2(-v.y, v.x);
 }
+
+// Matrix
+
+
+
+// 3D

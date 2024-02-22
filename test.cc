@@ -1,5 +1,9 @@
 #include "bezier.h"
 
+#define FPS 2000
+#define FTT (1000 / FPS)
+
+
 SDL_Window *initialize_window(const char *title) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "Error initialising SDL\n");
@@ -96,12 +100,13 @@ int main(int argc, const char *argv[]) {
 
         SDL_RenderClear(r);
 
-        // UPDATE
+        // UPDATE 1
 
-        int time_to_wait = FTT - (SDL_GetTicks() - last_frame_time);
-        if (time_to_wait > 0 && time_to_wait <= FTT) {
-            SDL_Delay(time_to_wait);
-        }
+        // int time_to_wait = FTT - (SDL_GetTicks() - last_frame_time);
+        // if (time_to_wait > 0 && time_to_wait <= FTT) {
+        //     SDL_Delay(time_to_wait);
+        // }
+
         // this is cool
         // float delta_time = (SDL_GetTicks() - last_frame_time);
         last_frame_time = SDL_GetTicks();
@@ -111,9 +116,60 @@ int main(int argc, const char *argv[]) {
         // std::cerr << "Delta time: " << delta_time << std::endl;
         // std::cerr << "Time: " << SDL_GetTicks() << std::endl;
 
-        // Render
 
-        // SDL_SetRenderDrawColor(r, 255, 200, 50, 255);
+        // Update
+
+        // Point a,b,c,d;
+        // a = Point(100,100);
+        // d = Point(500, 100);
+        // b = Point(180, 300);
+        // c = Point(400, 20);
+
+        // DrawPoint((*grid), a);
+        // DrawPoint((*grid), b);
+        // DrawPoint((*grid), c);
+        // DrawPoint((*grid), d);
+
+
+        // Point f = BersteinCubicSpline(a,b,c,d,t_);
+        // Vector2 v = BersteinCubicVelocity(a, b, c, d, t_);
+
+
+        // Point w1, w2, w3, w4;
+        // w1 = Point(0,0);
+        // w2 = Point(100,100);
+        // w3 = Point(200,100);
+        // w4 = Point(300,0);
+
+        // Point w = BersteinCubicSpline(w1, w2, w3, w4, t_);
+
+        // // DrawPoint(r, f);
+        // DrawWidth((*grid), f, v, (1.0f/20.0f)*w.y);
+
+        // float x = 25 / cosf(30* t_) + 300;
+        // float y = 2 * tanf(30*t_) + 300;
+        // float x = 100 * cosf(20*t_*2*M_PI);
+        // float y = 100 * sinf(20*t_*2*M_PI);
+        // Vector2 v(x,y);
+        // v = RotateV2(v, (M_PI/180)*35);
+
+        // Point p = v.toPoint();
+        // p.x += 300;
+        // p.y += 300;
+        // DrawPoint((*grid), p);
+
+        Point p0 = Point(100,100);
+        Point p1 = Point(150, 100);
+        Point p2 = Point(150,50);
+        vector<float> weights = {1.0f, sqrtf(2.0)/2.0f, 1.0f};
+        vector<Point> points = {p0, p1, p2};
+
+        Point res = BezierCurveRationalWeighted(2, points, weights, 25*t_);
+        DrawPoint((*grid), res);
+
+
+
+        // Render
 
         for (int i = 0; i < W_WIDTH; i++) {
             for (int j = 0; j < W_HEIGHT; j++) {
@@ -133,36 +189,6 @@ int main(int argc, const char *argv[]) {
             }
         }
         SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
-
-        // printf("%f\n", t_);
-
-        Point a,b,c,d;
-        a = Point(100,100);
-        d = Point(500, 100);
-        b = Point(180, 300);
-        c = Point(400, 20);
-
-        DrawPoint((*grid), a);
-        DrawPoint((*grid), b);
-        DrawPoint((*grid), c);
-        DrawPoint((*grid), d);
-
-
-        Point f = BersteinCubicSpline(a,b,c,d,t_);
-        Vector2 v = BersteinCubicVelocity(a, b, c, d, t_);
-
-
-        Point w1, w2, w3, w4;
-        w1 = Point(0,0);
-        w2 = Point(100,100);
-        w3 = Point(200,100);
-        w4 = Point(300,0);
-
-        Point w = BersteinCubicSpline(w1, w2, w3, w4, t_);
-
-        // DrawPoint(r, f);
-        DrawWidth((*grid), f, v, (1.0f/20.0f)*w.y);
-
 
         SDL_RenderPresent(r);
 

@@ -5,32 +5,6 @@
 
 #define W_WIDTH 1200
 #define W_HEIGHT 700
-#define FPS 140
-#define FTT (1000 / FPS)
-
-// typedef struct {
-//     float x;
-//     float y;
-// } Point;
-
-// typedef struct {
-//     Point p0;
-//     Point p1;
-//     float thickness;
-// } Line;
-
-// float LineGetLength(Line l) {
-//     return sqrtf((l.p0.x - l.p1.x) * (l.p0.x - l.p1.x) + (l.p0.y - l.p1.y) * (l.p0.y - l.p1.y));
-// }
-
-
-// Point lerp(Point p0, Point p1, float t) {
-//     Point res{};
-//     res.x = (1-t)*p0.x + t*p1.x;
-//     res.y = (1-t)*p0.y + t*p1.y;
-//     return res;
-// }
-
 
 class Point {
     public:
@@ -67,13 +41,158 @@ class Vector2 {
             x = p.x;
             y = p.y;
         }
+        Vector2(std::vector<float> sv) {
+            assert(sv.size() == 2);
+            x = sv[0]; y = sv[1];
+        }
         Vector2 operator+(Vector2 v) {
             return Vector2(x+v.x, y+v.y);
         }
         Vector2 operator-(Vector2 v) {
             return Vector2(x-v.x, y-v.y);
         }
+        float &operator[](size_t pos) {
+            assert(pos >= 0 && pos < 2);
+            if (pos == 0) return x;
+            if (pos == 1) return y;
+            throw "Vector2 Index Error";
+        }
+        const float &operator[](size_t pos) const {
+            assert(pos >= 0 && pos < 2);
+            if (pos == 0) return x;
+            if (pos == 1) return y;
+            throw "Vector2 Index Error";
+        }
         float magnitude();
+        Point toPoint() {
+            return Point(x,y);
+        }
+};
+
+class Vector3 {
+    public:
+        float x, y, z;
+        Vector3(): x(0), y(0), z(0) {};
+        Vector3(float a, float b, float c) : x(a), y(b), z(c) {};
+        Vector3(std::vector<float> sv) {
+            assert(sv.size() == 3);
+            x = sv[0]; y = sv[1]; z = sv[2];
+        }
+        Vector3 operator+(Vector3 v) {
+            return Vector3(x+v.x, y+v.y, z+v.z);
+        }
+        Vector3 operator-(Vector3 v) {
+            return Vector3(x-v.x, y-v.y, z+v.z);
+        }
+        float &operator[](size_t pos) {
+            assert(pos >= 0 && pos < 3);
+            if (pos == 0) return x;
+            if (pos == 1) return y;
+            if (pos == 2) return z;
+            throw "Vector2 Index Error";
+        }
+        const float &operator[](size_t pos) const {
+            assert(pos >= 0 && pos < 3);
+            if (pos == 0) return x;
+            if (pos == 1) return y;
+            if (pos == 2) return z;
+            throw "Vector2 Index Error";
+        }
+        float magnitude();
+};
+
+class Matrix2 {
+    // dimension 2x2
+    // Matrix2[i][j] is ith row, jth column
+    private:
+        std::vector<std::vector<float>> iv;
+    public:
+        Matrix2() {
+            iv.resize(2);
+            for (int i = 0; i < 2; i++) {
+                iv[i].resize(2);
+                iv[i][0] = 0;
+                iv[i][1] = 0;
+            }
+        }
+        Matrix2(std::vector<std::vector<float>> v) {
+            assert(v.size() == 2);
+            for (int i = 0; i < 2; i++) {
+                assert(v[i].size() == 2);
+            }
+            iv = v;
+        }
+        float get(size_t px, size_t py) {
+            assert(px < 2 && py < 2);
+            return iv[px][py];
+        }
+        void set(size_t px, size_t py, float n) {
+            iv[px][py] = n;
+        }
+        void setRow(size_t r, Vector2 v) {
+            iv[r][0] = v.x;
+            iv[r][1] = v.y;
+        }
+        void setColumn(size_t c, Vector2 v) {
+            iv[0][c] = v.x;
+            iv[1][c] = v.y;
+        }
+        Vector2 getRow(size_t r) {
+            return Vector2(iv[r][0], iv[r][1]);
+        }
+        Vector2 getColumn(size_t c) {
+            return Vector2(iv[0][c], iv[1][c]);
+        }
+        std::vector<std::vector<float>> getVectorForm();
+};
+
+class Matrix3 {
+    // dimension 3x3
+    // Matrix3[i][j] is ith row, jth column
+    private:
+        std::vector<std::vector<float>> iv;
+    public:
+        Matrix3() {
+            iv.resize(3);
+            for (int i = 0; i < 3; i++) {
+                iv[i].resize(3);
+                iv[i][0] = 0;
+                iv[i][1] = 0;
+                iv[i][2] = 0;
+            }
+        }
+        Matrix3(std::vector<std::vector<float>> v) {
+            assert(v.size() == 3);
+            for (int i = 0; i < 3; i++) {
+                assert(v[i].size() == 3);
+            }
+            iv = v;
+        }
+        float get(size_t px, size_t py) {
+            assert(px < 3 && py < 3);
+            return iv[px][py];
+        }
+        void set(size_t px, size_t py, float n) {
+            iv[px][py] = n;
+        }
+        void setRow(size_t r, Vector3 v) {
+            iv[r][0] = v.x;
+            iv[r][1] = v.y;
+            iv[r][2] = v.z;
+        }
+        void setColumn(size_t c, Vector3 v) {
+            iv[0][c] = v.x;
+            iv[1][c] = v.y;
+            iv[1][c] = v.z;
+        }
+        Vector3 getRow(size_t r) {
+            return Vector3(iv[r][0], iv[r][1], iv[r][2]);
+        }
+        Vector3 getColumn(size_t c) {
+            return Vector3(iv[0][c], iv[1][c], iv[2][c]);
+        }
+        std::vector<std::vector<float>> getVectorForm();
+
 };
 
 
@@ -99,6 +218,12 @@ Vector2 NormalV2(Vector2 v);
 
 unsigned int factorial(unsigned int n);
 
+// Matrices and Vectors
+
+Vector2 dot(Matrix2 m, Vector2 v);
+Vector3 dot(Matrix3 m, Vector3 v);
+Matrix2 dot(Matrix2 m1, Matrix2 m2);
+Matrix3 dot(Matrix3 m1, Matrix3 m2);
 
 // Drawing functions
 void DrawPoint(PixelGrid &g, Point p);
