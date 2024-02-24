@@ -24,6 +24,17 @@ class Point {
         }
 };
 
+class HomogeneousPoint: public Point {
+    public:
+        float w;
+        HomogeneousPoint(float z): Point() {
+            w = z;
+        }
+        Point projected() {
+            return Point(x/w, y/w);
+        }
+};
+
 class Vector2 {
     public:
         float x, y;
@@ -225,11 +236,40 @@ Vector3 dot(Matrix3 m, Vector3 v);
 Matrix2 dot(Matrix2 m1, Matrix2 m2);
 Matrix3 dot(Matrix3 m1, Matrix3 m2);
 
+// Rational Bezier Curves and Conic Sections
+
+Point MidPoint(Point p, Point q);
+Point Distance(Point p, Point q);
+
+const float FINITE_INF = FLT_MAX;
+
+Point UnitCircle(float t); // Parametric Unit Circle
+float StandardizeWeight(float w0, float w1, float w2);
+
+float WeightFromShapeCoefficient(float k);
+float ShapeCoefficient(Point m, Point i, HomogeneousPoint c); // m: midpoint, i: intersection, c: P1 control point
+Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Berstein Standardized Rational Quadratic Spline
+Point BSRQV(Point p0, Point p1, Point p2, float w, float t); // BSRQ Velocity
+Point BSRQA(Point p0, Point p1, Point p2, float w, float t); // BSRQ Acceleration
+Point BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
+
+Point CircleEllipsePointTangentForm(Point p0, Point p2, Vector2 t0, Vector2 t2); // Use vectors and points to calculate intersections and thus points for projection
+
+// Affine Transformations
+
+Point AffineTransformation(Point input, Matrix2 transm);
+Point AffineTranslate(Point input, float x, float y);
+Point AffineRotate(Point input, float angle); // rad
+Point AffineScale(Point input, float x, float y);
+Point AffineReflection(Point input, int direction);
+Point AffineShear(Point input, float factor);
+
 // Drawing functions
 void DrawPoint(PixelGrid &g, Point p);
 void DrawLine(PixelGrid &g, Point s, Point e);
 void DrawCircle(PixelGrid &g, Point o, float radius);
 void DrawWidth(PixelGrid &g, Point o, Vector2 v, float w);
+
 
 
 #endif // BEZIER_H

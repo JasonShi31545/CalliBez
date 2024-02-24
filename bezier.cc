@@ -266,6 +266,15 @@ Vector2 NormalV2(Vector2 v) {
     return Vector2(-v.y, v.x);
 }
 
+
+float StandardizeWeight(float w0, float w1, float w2) {
+    return w1 * sqrtf(1/ (w0 * w2));
+}
+
+float WeightFromShapeCoefficient(float k) {
+    return k / (1 - k);
+}
+
 // Matrix
 
 
