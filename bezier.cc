@@ -93,7 +93,7 @@ void DrawPoint(PixelGrid &g, Point p) {
     // SDL_RenderDrawPointF(r, p.x, W_HEIGHT - p.y)
     int rx = roundf(p.x);
     int ry = W_HEIGHT - round(p.y);
-    if (rx < 0 || rx > W_WIDTH || ry < 0 || ry > W_HEIGHT) return;
+    if (rx < 0 || rx >= W_WIDTH || ry < 0 || ry >= W_HEIGHT) return;
     g[rx][ry] = (uint32_t)0xFFFFFFFF;
 }
 

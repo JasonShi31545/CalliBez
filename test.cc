@@ -135,13 +135,13 @@ int main(int argc, const char *argv[]) {
         // Vector2 v = BersteinCubicVelocity(a, b, c, d, t_);
 
 
-        // Point w1, w2, w3, w4;
-        // w1 = Point(0,0);
-        // w2 = Point(100,100);
-        // w3 = Point(200,100);
-        // w4 = Point(300,0);
+        Point w1, w2, w3, w4;
+        w1 = Point(0,0);
+        w2 = Point(100,100);
+        w3 = Point(200,100);
+        w4 = Point(300,0);
 
-        // Point w = BersteinCubicSpline(w1, w2, w3, w4, t_);
+        Point w = BersteinCubicSpline(w1, w2, w3, w4, t_);
 
         // // DrawPoint(r, f);
         // DrawWidth((*grid), f, v, (1.0f/20.0f)*w.y);
@@ -158,16 +158,21 @@ int main(int argc, const char *argv[]) {
         // p.y += 300;
         // DrawPoint((*grid), p);
 
-        Point p0 = Point(100,100);
-        Point p1 = Point(150, 100);
-        Point p2 = Point(150,50);
+        Point p0 = Point(300,300);
+        Point p1 = Point(450, 300);
+        Point p2 = Point(450,150);
         vector<float> weights = {1.0f, sqrtf(2.0)/2.0f, 1.0f};
+        vector<float> weights2 = {1.0f, -sqrtf(2.0)/2.0f, 1.0f};
+
         vector<Point> points = {p0, p1, p2};
 
-        Point res = BezierCurveRationalWeighted(2, points, weights, 25*t_);
-        DrawPoint((*grid), res);
+        Point res1 = BezierCurveRationalWeighted(2, points, weights, t_);
+        Point res2 = BezierCurveRationalWeighted(2, points, weights2, t_);
 
+        DrawPoint((*grid), res1);
+        DrawPoint((*grid), res2);
 
+        DrawCircle(*grid, Point(300,300), 150);
 
         // Render
 
