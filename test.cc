@@ -143,7 +143,6 @@ int main(int argc, const char *argv[]) {
         // Calculate & Update
 
 
-
         Point p = BezierCurveRationalWeighted(2, points, weights1, t);
         p = LinearScale(p, 2.0f, 1.0f);
         p = ShiftCoordinate(p, 300, 300);

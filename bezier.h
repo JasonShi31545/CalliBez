@@ -274,9 +274,12 @@ std::tuple<HomogeneousPoint, Point, float> ConstructArc(Point p0, float angle);
 
 
 Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Berstein Standardized Rational Quadratic Spline
-Point BSRQV(Point p0, Point p1, Point p2, float w, float t); // BSRQ Velocity
-Point BSRQA(Point p0, Point p1, Point p2, float w, float t); // BSRQ Acceleration
-Point BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
+Vector2 BSRQV(Point p0, Point p1, Point p2, float w, float t); // BSRQ Velocity
+Vector2 BSRQA(Point p0, Point p1, Point p2, float w, float t); // BSRQ Acceleration
+
+// Currently not required:
+// float BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
+// float BSRQR(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
 
 // Point CircleEllipsePointTangentForm(Point p0, Point p2, Vector2 t0, Vector2 t2); // Use vectors and points to calculate intersections and thus points for projection
 

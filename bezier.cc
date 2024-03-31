@@ -350,6 +350,27 @@ std::tuple<HomogeneousPoint, Point, float> ConstructArc(Point p0, float angle) {
 }
 
 
+Point BSRQS(Point p0, Point p1, Point p2, float w, float t) {
+    std::vector<Point> ps = {p0, p1, p2};
+    std::vector<float> ws = {1.0f, w, 1.0f};
+    return BezierCurveRationalWeighted(2, ps, ws, t);
+}
+/*
+  The Velocity and Acceleration Values are not yet needed, but if they are, the algebraic
+  forms are available in the /resources directory.
+  Where:
+  p = p0, q = p1, r = p2, w=w, t=t
+ */
+
+Vector2 BSRQV(Point p0, Point p1, Point p2, float w, float t) {
+    // yet to be implemented
+    return Vector2();
+}
+Vector2 BSRQA(Point p0, Point p1, Point p2, float w, float t) {
+    // yet to be implemented
+    return Vector2();
+}
+
 /* Affine Transformations */
 
 HomogeneousPoint AffineTransformation(HomogeneousPoint input, Matrix3 transm){
