@@ -109,7 +109,7 @@ void DrawLine(PixelGrid &g, Point s, Point e) {
 
 void DrawCircle(PixelGrid &g, Point o, float radius) {
     float x,y;
-    for (float t = 0.0f; t <= 2*M_PI; t += 0.01f) {
+    for (float t = 0.0f; t <= M_2_PIf; t += 0.01f) {
         x = radius*cosf(t) + o.x;
         y = radius*sinf(t) + o.y;
         // DrawPoint(r, Point(x,y));
@@ -295,23 +295,29 @@ float Distance(Point p, Point q) {
 //}
 
 
-std::pair<HomogeneousPoint, float> ConstructArc(Point o, Point p0, float angle) {
+std::tuple<HomogeneousPoint, Point, float> ConstructArc(Point p0, float angle) {
     // where the Homogeneous Point is P1 and its corresponding weight
     // Vector2 is the gradient vector at the end of the arc
     // positive angle is counterclockwise
-
+    const Point o{0.0f, 0.0f}; // this cannot change, we only translate using affine translation later
     float r = Distance(o, p0); // radius
     float alpha0 = atanf((p0.y - o.y) / (p0.x - o.x));
-    float delta_alpha = angle - alpha0;
+    float theta;
+    // if (alpha0 > M_PI_2f || alpha0 < -M_PI_2f) {
+    //     theta = angle + alpha0;
+    // } else {
+    //     theta = -angle + alpha0;
+    // }
+    theta = angle+alpha0;
     float p2x, p2y;
-    p2x = p0.x + r*cosf(delta_alpha);
-    p2y = p0.y + r*sinf(delta_alpha);
+    p2x = o.x + r*cosf(theta);
+    p2y = o.y + r*sinf(theta);
     Point p2{p2x,p2y};
 
     Point midpoint = MidPoint(p0, p2);
     // find P1
-    float p0_s = -(p0.x) / (p0.y);
-    float p2_s = -(p2.x) / (p2.y);
+    float p0_s = -(p0.x - o.x) / (p0.y - o.y);
+    float p2_s = -(p2.x - o.x) / (p2.y - o.y);
 
     // y = p0_s * (x - p0.x) + p0.y
     // y = p2_s * (x - p2.x) + p2.y
@@ -326,12 +332,12 @@ std::pair<HomogeneousPoint, float> ConstructArc(Point o, Point p0, float angle) 
     // L(x) = s(x-m)+u
     // Find q, k, w
     float qx, qy;
-    qx = (m * s * s - s * u - sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u)) / (1+(s*s));
-    qy = -m*s + (m*s*s*s)/(1+(s*s)) + u + -(s*s*u)/(1+(s*s)) + -(s * sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u))/(1+(s*s));
+    // qx = (m * s * s - s * u - sqrtf(r*r - m*m*s*s + r*r*s*s + 3*m*s*u - u*u)) / (1+(s*s));
+    // qy = -m*s + (m*s*s*s)/(1+(s*s)) + u + -(s*s*u)/(1+(s*s)) + -(s * sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u))/(1+(s*s));
 
     // The other solution
-    // qx = (m * s * s - s * u + sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u)) / (1+(s*s));
-    // qy = -m*s + (m*s*s*s)/(1+(s*s)) + u + (s*s*u)/(1+(s*s)) + -(s * sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u))/(1+(s*s));
+    qx = (m * s * s - s * u + sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u)) / (1+(s*s));
+    qy = -m*s + (m*s*s*s)/(1+(s*s)) + u + -(s*s*u)/(1+(s*s)) + (s * sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u))/(1+(s*s));
 
     float k = (sqrtf((m-qx) * (m-qx) + (u-qy) * (u-qy)))/(sqrtf((m-p1x) * (m-p1x) + (u-p1y) * (u-p1y)));
     float w = k / (1.0f-k);
@@ -340,7 +346,7 @@ std::pair<HomogeneousPoint, float> ConstructArc(Point o, Point p0, float angle) 
 
     // gradient vector of p2 is p2_s
 
-    return std::make_pair(p1_result, p2_s);
+    return std::make_tuple(p1_result, p2, p2_s);
 }
 
 
@@ -381,4 +387,41 @@ HomogeneousPoint AffineShearX(HomogeneousPoint input, float angle /* rad */){
 HomogeneousPoint AffineShearY(HomogeneousPoint input, float angle /* rad */){
     Matrix3 t{std::vector<std::vector<float>>({{1.0f, 0.0f, 0.0f}, {tanf(angle), 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}})};
     return AffineTransformation(input, t);
+}
+
+
+Point LinearTransformation(Point input, Matrix2 transm) {
+    return dot(transm, Vector2(input.x, input.y)).toPoint();
+}
+Point LinearReflectionX(Point input) {
+    Matrix2 t{std::vector<std::vector<float>>({{1.0f, 0.0f},{0.0f, -1.0f}})};
+    return LinearTransformation(input, t);
+}
+Point LinearReflectionY(Point input) {
+    Matrix2 t{std::vector<std::vector<float>>({{-1.0f, 0.0f},{0.0f, 1.0f}})};
+    return LinearTransformation(input, t);
+}
+Point LinearReflectionLineAngle(Point input, float angle /* rad */) {
+    Matrix2 t{std::vector<std::vector<float>>({{cosf(2.0f*angle), sinf(2.0f*angle)},{sinf(2.0f*angle), -cosf(2.0f*angle)}})};
+    return LinearTransformation(input, t);
+}
+Point LinearScale(Point input, float x, float y) {
+    Matrix2 t{std::vector<std::vector<float>>({{x, 0.0f},{0.0f, y}})};
+    return LinearTransformation(input, t);
+}
+Point LinearShearX(Point input, float k) {
+    Matrix2 t{std::vector<std::vector<float>>({{1.0f, k},{0.0f, 1.0f}})};
+    return LinearTransformation(input, t);
+}
+Point LinearShearY(Point input, float k) {
+    Matrix2 t{std::vector<std::vector<float>>({{1.0f, 0.0f},{k, 1.0f}})};
+    return LinearTransformation(input, t);
+}
+Point LinearRotate(Point input, float angle /* rad */) {
+    Matrix2 t{std::vector<std::vector<float>>({{cosf(angle), -sinf(angle)},{sinf(angle), cosf(angle)}})};
+    return LinearTransformation(input, t);
+}
+
+Point ShiftCoordinate(Point input, float x, float y) {
+    return Point{input.x + x, input.y + y};
 }

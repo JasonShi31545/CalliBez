@@ -3,8 +3,8 @@
 
 #include "header.h"
 
-#define W_WIDTH 1200
-#define W_HEIGHT 700
+#define W_WIDTH 1800
+#define W_HEIGHT 1050
 
 class Point {
     public:
@@ -39,6 +39,9 @@ class HomogeneousPoint: public Point {
             x = p.x;
             y = p.y;
             w = z;
+        }
+        HomogeneousPoint(Point &p): Point() {
+            w = 1.0f;
         }
         HomogeneousPoint() : Point() {
             w = 0.0f;
@@ -267,7 +270,7 @@ float StandardizeWeight(float w0, float w1, float w2);
 // float WeightFromShapeCoefficient(float k);
 // float ShapeCoefficient(Point m, Point i, HomogeneousPoint c); // m: midpoint, i: intersection, c: P1 control point
 
-std::pair<HomogeneousPoint, float> ConstructCircle(Point o, Point p0, float angle);
+std::tuple<HomogeneousPoint, Point, float> ConstructArc(Point p0, float angle);
 
 
 Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Berstein Standardized Rational Quadratic Spline
@@ -288,6 +291,22 @@ HomogeneousPoint AffineReflectionX(HomogeneousPoint input);
 HomogeneousPoint AffineReflectionY(HomogeneousPoint input);
 HomogeneousPoint AffineShearX(HomogeneousPoint input, float angle);
 HomogeneousPoint AffineShearY(HomogeneousPoint input, float angle);
+
+
+// Linear Transformations
+
+Point LinearTransformation(Point input, Matrix2 tranm);
+Point LinearReflectionX(Point input);
+Point LinearReflectionY(Point input);
+Point LinearReflectionLineAngle(Point input, float angle /* rad */);
+Point LinearScale(Point input, float x, float y);
+Point LinearShearX(Point input, float k);
+Point LinearShearY(Point input, float k);
+Point LinearRotate(Point input, float angle /* rad */);
+
+// Basic Translate Coz Im lazy
+
+Point ShiftCoordinate(Point input, float x, float y);
 
 // Drawing functions
 void DrawPoint(PixelGrid &g, Point p);
