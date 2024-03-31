@@ -50,12 +50,12 @@ void destroy(SDL_Window *w, SDL_Renderer *r) {
 }
 
 
-float t_;
+float t;
 
 int main(int argc, const char *argv[]) {
     using namespace std;
 
-    t_ = 0.0f;
+    t = 0.0f;
 
     PixelGrid *grid = new vector<vector<uint32_t>> ();
     grid->resize(W_WIDTH);
@@ -71,12 +71,12 @@ int main(int argc, const char *argv[]) {
 
     srand(time(NULL));
 
-    SDL_Window *w;
-    SDL_Renderer *r;
-    SDL_Surface *s;
-    SDL_Texture *t;
+    SDL_Window *win;
+    SDL_Renderer *ren;
+    SDL_Surface *sur;
+    SDL_Texture *tex;
 
-    assert(initialize_frame(&w,&r,&s,&t) == 0);
+    assert(initialize_frame(&win,&ren,&sur,&tex) == 0);
     bool running = true;
 
 
@@ -96,9 +96,9 @@ int main(int argc, const char *argv[]) {
                 break;
         }
 
-        SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, 0);
 
-        SDL_RenderClear(r);
+        SDL_RenderClear(ren);
 
         // UPDATE 1
 
@@ -111,8 +111,8 @@ int main(int argc, const char *argv[]) {
         // float delta_time = (SDL_GetTicks() - last_frame_time);
         last_frame_time = SDL_GetTicks();
 
-        t_ = last_frame_time - 280;
-        t_ = TimeTransform(t_);
+        t = last_frame_time - 280;
+        t = TimeTransform(t);
         // std::cerr << "Delta time: " << delta_time << std::endl;
         // std::cerr << "Time: " << SDL_GetTicks() << std::endl;
 
@@ -135,13 +135,13 @@ int main(int argc, const char *argv[]) {
         // Vector2 v = BersteinCubicVelocity(a, b, c, d, t_);
 
 
-        Point w1, w2, w3, w4;
-        w1 = Point(0,0);
-        w2 = Point(100,100);
-        w3 = Point(200,100);
-        w4 = Point(300,0);
+        // Point w1, w2, w3, w4;
+        // w1 = Point(0,0);
+        // w2 = Point(100,100);
+        // w3 = Point(200,100);
+        // w4 = Point(300,0);
 
-        Point w = BersteinCubicSpline(w1, w2, w3, w4, t_);
+        // Point w = BersteinCubicSpline(w1, w2, w3, w4, t);
 
         // // DrawPoint(r, f);
         // DrawWidth((*grid), f, v, (1.0f/20.0f)*w.y);
@@ -158,21 +158,38 @@ int main(int argc, const char *argv[]) {
         // p.y += 300;
         // DrawPoint((*grid), p);
 
+        // Point p0 = Point(300,320);
+        // Point p1 = Point(450, 320);
+        // Point p2 = Point(450,170);
+        // vector<float> weights = {1.0f, sqrtf(2.0)/2.0f, 1.0f};
+        // vector<float> weights2 = {1.0f, -sqrtf(2.0)/2.0f, 1.0f};
+
+        // vector<Point> points = {p0, p1, p2};
+
+        // Point res1 = BezierCurveRationalWeighted(2, points, weights, t_);
+        // Point res2 = BezierCurveRationalWeighted(2, points, weights2, t_);
+
+        // DrawPoint((*grid), res1);
+        // DrawPoint((*grid), res2);
+
+        // DrawCircle(*grid, Point(300,300), 150);
+
         Point p0 = Point(300,300);
-        Point p1 = Point(450, 300);
-        Point p2 = Point(450,150);
-        vector<float> weights = {1.0f, sqrtf(2.0)/2.0f, 1.0f};
-        vector<float> weights2 = {1.0f, -sqrtf(2.0)/2.0f, 1.0f};
+        Point p1 = Point(420, 275);
+        Point p2 = Point(350, 200);
+        std::cerr << "Weight: " << CircularWeightFromPoints(p0, p1, p2) << std::endl;
+
+        vector<float> weights = {1.0f, CircularWeightFromPoints(p0, p1, p2), 1.0f};
+        vector<float> weights2 = {1.0f, -CircularWeightFromPoints(p0, p1, p2), 1.0f};
 
         vector<Point> points = {p0, p1, p2};
+        Point res1 = BezierCurveRationalWeighted(2, points, weights, t);
+        Point res2 = BezierCurveRationalWeighted(2, points, weights2, t);
 
-        Point res1 = BezierCurveRationalWeighted(2, points, weights, t_);
-        Point res2 = BezierCurveRationalWeighted(2, points, weights2, t_);
 
         DrawPoint((*grid), res1);
         DrawPoint((*grid), res2);
 
-        DrawCircle(*grid, Point(300,300), 150);
 
         // Render
 
@@ -188,18 +205,18 @@ int main(int argc, const char *argv[]) {
                     b = (Uint8)((pixel_val & 0x0000FF00) >> 8U);
                     a = (Uint8)((pixel_val & 0x000000FF) >> 0U);
 
-                    SDL_SetRenderDrawColor(r, red, g, b, a);
-                    SDL_RenderDrawPoint(r, i, j);
+                    SDL_SetRenderDrawColor(ren, red, g, b, a);
+                    SDL_RenderDrawPoint(ren, i, j);
                 }
             }
         }
-        SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, 0);
 
-        SDL_RenderPresent(r);
+        SDL_RenderPresent(ren);
 
     }
 
-    destroy(w,r);
+    destroy(win,ren);
     delete grid;
 
     return 0;

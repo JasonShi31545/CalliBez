@@ -271,12 +271,114 @@ float StandardizeWeight(float w0, float w1, float w2) {
     return w1 * sqrtf(1/ (w0 * w2));
 }
 
-float WeightFromShapeCoefficient(float k) {
-    return k / (1 - k);
+Point MidPoint(Point p, Point q) {
+    Point r{};
+    r.x = (p.x + q.x) / 2.0f;
+    r.y = (p.y + q.y) / 2.0f;
+    return r;
+}
+float Distance(Point p, Point q) {
+    return sqrtf((q.x - p.x) * (q.x - p.x) + (q.y - p.y) * (q.y - p.y));
 }
 
-// Matrix
+// Bitch ass paper lying to me
+//float CircularWeightFromPoints(Point p0, Point p1, Point p2) {
+    // w = cos(alpha) = (A^2 + B^2 - C^2) / (2 A B)
+    // where A is the distance between P0 and P1
+    // B is the distance between P1 and P2
+    // C is the distance between P0 and P2
+    // float A = Distance(p0, p1);
+    // float B = Distance(p1, p2);
+    // float C = Distance(p0, p2);
+    // return (A*A + B*B - C*C) / (2.0f * A * B); // cosine rule
+
+//}
 
 
+std::pair<HomogeneousPoint, float> ConstructArc(Point o, Point p0, float angle) {
+    // where the Homogeneous Point is P1 and its corresponding weight
+    // Vector2 is the gradient vector at the end of the arc
+    // positive angle is counterclockwise
 
-// 3D
+    float r = Distance(o, p0); // radius
+    float alpha0 = atanf((p0.y - o.y) / (p0.x - o.x));
+    float delta_alpha = angle - alpha0;
+    float p2x, p2y;
+    p2x = p0.x + r*cosf(delta_alpha);
+    p2y = p0.y + r*sinf(delta_alpha);
+    Point p2{p2x,p2y};
+
+    Point midpoint = MidPoint(p0, p2);
+    // find P1
+    float p0_s = -(p0.x) / (p0.y);
+    float p2_s = -(p2.x) / (p2.y);
+
+    // y = p0_s * (x - p0.x) + p0.y
+    // y = p2_s * (x - p2.x) + p2.y
+
+    // intersection
+    float p1x = ((p0.x * p0_s - p2.x * p2_s) + (p2.y - p0.y)) / (p0_s - p2_s);
+    float p1y = p0_s * (p1x - p0.x) + p0.y;
+    Point p1{p1x,p1y};
+
+    float m = midpoint.x, u = midpoint.y, s = (p1.y - midpoint.y) / (p1.x - midpoint.x);
+
+    // L(x) = s(x-m)+u
+    // Find q, k, w
+    float qx, qy;
+    qx = (m * s * s - s * u - sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u)) / (1+(s*s));
+    qy = -m*s + (m*s*s*s)/(1+(s*s)) + u + -(s*s*u)/(1+(s*s)) + -(s * sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u))/(1+(s*s));
+
+    // The other solution
+    // qx = (m * s * s - s * u + sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u)) / (1+(s*s));
+    // qy = -m*s + (m*s*s*s)/(1+(s*s)) + u + (s*s*u)/(1+(s*s)) + -(s * sqrtf(r*r - m*m*s*s + r*r*s*s + 2*m*s*u - u*u))/(1+(s*s));
+
+    float k = (sqrtf((m-qx) * (m-qx) + (u-qy) * (u-qy)))/(sqrtf((m-p1x) * (m-p1x) + (u-p1y) * (u-p1y)));
+    float w = k / (1.0f-k);
+
+    HomogeneousPoint p1_result{p1, w};
+
+    // gradient vector of p2 is p2_s
+
+    return std::make_pair(p1_result, p2_s);
+}
+
+
+/* Affine Transformations */
+
+HomogeneousPoint AffineTransformation(HomogeneousPoint input, Matrix3 transm){
+    return dot(transm, Vector3{input}).toPoint();
+}
+HomogeneousPoint AffineTranslate(HomogeneousPoint input, float x, float y){
+    Matrix3 t{std::vector<std::vector<float>>({{1.0f, 0.0f, x}, {0.0f, 1.0f, y}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineRotate(HomogeneousPoint input, float angle /* rad */){
+    Matrix3 t{std::vector<std::vector<float>>({{cosf(angle), -sinf(angle), 0.0f}, {sinf(angle), cosf(angle), 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineScale(HomogeneousPoint input, float x, float y){
+    // About Origin
+    Matrix3 t{std::vector<std::vector<float>>({{x, 0.0f, 0.0f}, {0.0f, y, 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineReflectionO(HomogeneousPoint input) {
+    Matrix3 t{std::vector<std::vector<float>>({{-1.0f, 0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineReflectionX(HomogeneousPoint input) {
+    Matrix3 t{std::vector<std::vector<float>>({{1.0f, 0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineReflectionY(HomogeneousPoint input) {
+    Matrix3 t{std::vector<std::vector<float>>({{-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineShearX(HomogeneousPoint input, float angle /* rad */){
+    Matrix3 t{std::vector<std::vector<float>>({{1.0f, tanf(angle), 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}
+HomogeneousPoint AffineShearY(HomogeneousPoint input, float angle /* rad */){
+    Matrix3 t{std::vector<std::vector<float>>({{1.0f, 0.0f, 0.0f}, {tanf(angle), 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}})};
+    return AffineTransformation(input, t);
+}

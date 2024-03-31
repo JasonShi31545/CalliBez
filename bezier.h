@@ -27,8 +27,21 @@ class Point {
 class HomogeneousPoint: public Point {
     public:
         float w;
+        HomogeneousPoint (float x, float y, float z): Point() {
+            this->x = x;
+            this->y = y;
+            w = z;
+        }
         HomogeneousPoint(float z): Point() {
             w = z;
+        }
+        HomogeneousPoint(Point &p, float z): Point() {
+            x = p.x;
+            y = p.y;
+            w = z;
+        }
+        HomogeneousPoint() : Point() {
+            w = 0.0f;
         }
         Point projected() {
             return Point(x/w, y/w);
@@ -89,6 +102,7 @@ class Vector3 {
             assert(sv.size() == 3);
             x = sv[0]; y = sv[1]; z = sv[2];
         }
+        Vector3(HomogeneousPoint &p): x(p.x), y(p.y), z(p.w) {};
         Vector3 operator+(Vector3 v) {
             return Vector3(x+v.x, y+v.y, z+v.z);
         }
@@ -110,6 +124,9 @@ class Vector3 {
             throw "Vector2 Index Error";
         }
         float magnitude();
+        HomogeneousPoint toPoint() {
+            return HomogeneousPoint(x,y,z);
+        }
 };
 
 class Matrix2 {
@@ -203,7 +220,6 @@ class Matrix3 {
             return Vector3(iv[0][c], iv[1][c], iv[2][c]);
         }
         std::vector<std::vector<float>> getVectorForm();
-
 };
 
 
@@ -239,30 +255,39 @@ Matrix3 dot(Matrix3 m1, Matrix3 m2);
 // Rational Bezier Curves and Conic Sections
 
 Point MidPoint(Point p, Point q);
-Point Distance(Point p, Point q);
+float Distance(Point p, Point q);
 
 const float FINITE_INF = FLT_MAX;
 
+// Circle -- aka. Pain in the arse
 Point UnitCircle(float t); // Parametric Unit Circle
 float StandardizeWeight(float w0, float w1, float w2);
 
-float WeightFromShapeCoefficient(float k);
-float ShapeCoefficient(Point m, Point i, HomogeneousPoint c); // m: midpoint, i: intersection, c: P1 control point
+// float CircularWeightFromPoints(Point p0, Point p1, Point p2);
+// float WeightFromShapeCoefficient(float k);
+// float ShapeCoefficient(Point m, Point i, HomogeneousPoint c); // m: midpoint, i: intersection, c: P1 control point
+
+std::pair<HomogeneousPoint, float> ConstructCircle(Point o, Point p0, float angle);
+
+
 Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Berstein Standardized Rational Quadratic Spline
 Point BSRQV(Point p0, Point p1, Point p2, float w, float t); // BSRQ Velocity
 Point BSRQA(Point p0, Point p1, Point p2, float w, float t); // BSRQ Acceleration
 Point BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
 
-Point CircleEllipsePointTangentForm(Point p0, Point p2, Vector2 t0, Vector2 t2); // Use vectors and points to calculate intersections and thus points for projection
+// Point CircleEllipsePointTangentForm(Point p0, Point p2, Vector2 t0, Vector2 t2); // Use vectors and points to calculate intersections and thus points for projection
 
 // Affine Transformations
 
-Point AffineTransformation(Point input, Matrix2 transm);
-Point AffineTranslate(Point input, float x, float y);
-Point AffineRotate(Point input, float angle); // rad
-Point AffineScale(Point input, float x, float y);
-Point AffineReflection(Point input, int direction);
-Point AffineShear(Point input, float factor);
+HomogeneousPoint AffineTransformation(HomogeneousPoint input, Matrix3 transm);
+HomogeneousPoint AffineTranslate(HomogeneousPoint input, float x, float y);
+HomogeneousPoint AffineRotate(HomogeneousPoint input, float angle); // rad
+HomogeneousPoint AffineScale(HomogeneousPoint input, float x, float y);
+HomogeneousPoint AffineReflectionO(HomogeneousPoint input);
+HomogeneousPoint AffineReflectionX(HomogeneousPoint input);
+HomogeneousPoint AffineReflectionY(HomogeneousPoint input);
+HomogeneousPoint AffineShearX(HomogeneousPoint input, float angle);
+HomogeneousPoint AffineShearY(HomogeneousPoint input, float angle);
 
 // Drawing functions
 void DrawPoint(PixelGrid &g, Point p);
