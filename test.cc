@@ -55,8 +55,12 @@ float t;
 int main(int argc, const char *argv[]) {
     using namespace std;
 
+    // Time Setup
     t = 0.0f;
+    int last_frame_time = SDL_GetTicks();
+    srand(time(NULL));
 
+    // Pixel Canvas Setup
     PixelGrid *grid = new vector<vector<uint32_t>> ();
     grid->resize(W_WIDTH);
     for (size_t i = 0 ; i < W_WIDTH; i++) {
@@ -66,22 +70,19 @@ int main(int argc, const char *argv[]) {
         }
     }
 
-
-    int last_frame_time = SDL_GetTicks();
-
-    srand(time(NULL));
-
+    // SDL Setup
     SDL_Window *win;
     SDL_Renderer *ren;
     SDL_Surface *sur;
     SDL_Texture *tex;
 
     assert(initialize_frame(&win,&ren,&sur,&tex) == 0);
+
+    // Main Event Loop
     bool running = true;
-
-
     SDL_Event event;
     while (running) {
+        // Poll Events and interrupts
         SDL_PollEvent(&event);
         switch (event.type) {
             case SDL_QUIT:
@@ -96,99 +97,19 @@ int main(int argc, const char *argv[]) {
                 break;
         }
 
+        // Setup
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 0);
-
         SDL_RenderClear(ren);
 
-        // UPDATE 1
 
-        // int time_to_wait = FTT - (SDL_GetTicks() - last_frame_time);
-        // if (time_to_wait > 0 && time_to_wait <= FTT) {
-        //     SDL_Delay(time_to_wait);
-        // }
+        // Timing
 
-        // this is cool
-        // float delta_time = (SDL_GetTicks() - last_frame_time);
         last_frame_time = SDL_GetTicks();
 
         t = last_frame_time - 280;
         t = TimeTransform(t);
-        // std::cerr << "Delta time: " << delta_time << std::endl;
-        // std::cerr << "Time: " << SDL_GetTicks() << std::endl;
 
-
-        // Update
-
-        // Point a,b,c,d;
-        // a = Point(100,100);
-        // d = Point(500, 100);
-        // b = Point(180, 300);
-        // c = Point(400, 20);
-
-        // DrawPoint((*grid), a);
-        // DrawPoint((*grid), b);
-        // DrawPoint((*grid), c);
-        // DrawPoint((*grid), d);
-
-
-        // Point f = BersteinCubicSpline(a,b,c,d,t_);
-        // Vector2 v = BersteinCubicVelocity(a, b, c, d, t_);
-
-
-        // Point w1, w2, w3, w4;
-        // w1 = Point(0,0);
-        // w2 = Point(100,100);
-        // w3 = Point(200,100);
-        // w4 = Point(300,0);
-
-        // Point w = BersteinCubicSpline(w1, w2, w3, w4, t);
-
-        // // DrawPoint(r, f);
-        // DrawWidth((*grid), f, v, (1.0f/20.0f)*w.y);
-
-        // float x = 25 / cosf(30* t_) + 300;
-        // float y = 2 * tanf(30*t_) + 300;
-        // float x = 100 * cosf(20*t_*2*M_PI);
-        // float y = 100 * sinf(20*t_*2*M_PI);
-        // Vector2 v(x,y);
-        // v = RotateV2(v, (M_PI/180)*35);
-
-        // Point p = v.toPoint();
-        // p.x += 300;
-        // p.y += 300;
-        // DrawPoint((*grid), p);
-
-        // Point p0 = Point(300,320);
-        // Point p1 = Point(450, 320);
-        // Point p2 = Point(450,170);
-        // vector<float> weights = {1.0f, sqrtf(2.0)/2.0f, 1.0f};
-        // vector<float> weights2 = {1.0f, -sqrtf(2.0)/2.0f, 1.0f};
-
-        // vector<Point> points = {p0, p1, p2};
-
-        // Point res1 = BezierCurveRationalWeighted(2, points, weights, t_);
-        // Point res2 = BezierCurveRationalWeighted(2, points, weights2, t_);
-
-        // DrawPoint((*grid), res1);
-        // DrawPoint((*grid), res2);
-
-        // DrawCircle(*grid, Point(300,300), 150);
-
-        Point p0 = Point(300,300);
-        Point p1 = Point(420, 275);
-        Point p2 = Point(350, 200);
-        std::cerr << "Weight: " << CircularWeightFromPoints(p0, p1, p2) << std::endl;
-
-        vector<float> weights = {1.0f, CircularWeightFromPoints(p0, p1, p2), 1.0f};
-        vector<float> weights2 = {1.0f, -CircularWeightFromPoints(p0, p1, p2), 1.0f};
-
-        vector<Point> points = {p0, p1, p2};
-        Point res1 = BezierCurveRationalWeighted(2, points, weights, t);
-        Point res2 = BezierCurveRationalWeighted(2, points, weights2, t);
-
-
-        DrawPoint((*grid), res1);
-        DrawPoint((*grid), res2);
+        // Calculate & Update
 
 
         // Render
@@ -215,6 +136,8 @@ int main(int argc, const char *argv[]) {
         SDL_RenderPresent(ren);
 
     }
+
+    // Clean up
 
     destroy(win,ren);
     delete grid;
