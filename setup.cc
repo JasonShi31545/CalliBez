@@ -1,8 +1,4 @@
-#include "bezier.h"
-
-#define FPS 2000
-#define FTT (1000 / FPS)
-
+#include "setup.h"
 
 SDL_Window *initialize_window(const char *title) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -49,14 +45,11 @@ void destroy(SDL_Window *w, SDL_Renderer *r) {
     SDL_Quit();
 }
 
-
-float t;
-
-int main(int argc, const char *argv[]) {
+void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
     using namespace std;
 
     // Time Setup
-    t = 0.0f;
+    float t = 0.0f;
     int last_frame_time = SDL_GetTicks();
     srand(time(NULL));
 
@@ -77,37 +70,6 @@ int main(int argc, const char *argv[]) {
     SDL_Texture *tex;
 
     assert(initialize_frame(&win,&ren,&sur,&tex) == 0);
-
-    // Stack variables
-
-    Point _p0 = Point{100, 100};
-    float alpha = 1.05f;
-    std::tuple<HomogeneousPoint, Point, float> circ = ConstructArc(_p0, alpha);
-    HomogeneousPoint p1 = std::get<0>(circ);
-    Point _p1 = Point{p1.x, p1.y};
-    float w = p1.w;
-
-    std::cerr << "P1 x: " << p1.x << " P1 y: " << p1.y << " P1 w: " << p1.w << std::endl;
-
-    Point _p2 = std::get<1>(circ);
-    std::cerr << "P2 x: " << _p2.x << " P2 y: " << _p2.y << std::endl;
-
-    std::vector<Point> points = {_p0, _p1, _p2};
-    std::vector<float> weights1 = {1.0f, w, 1.0f};
-    std::vector<float> weights2 = {1.0f, -w, 1.0f};
-
-    // HomogeneousPoint p0, p2;
-    // p0 = HomogeneousPoint(_p0);
-    // p2 = HomogeneousPoint(_p2);
-
-    // p0, p1, p2 are Homogeneous Points
-
-    // p0 = AffineTranslate(p0, 300, 300);
-    // p1 = AffineTranslate(p1, 300, 300);
-    // p2 = AffineTranslate(p2, 300, 300);
-
-    // std::vector<Point> points = {p0.projected(), p1.projected(), p2.projected()};
-
 
     // Main Event Loop
     bool running = true;
@@ -142,19 +104,7 @@ int main(int argc, const char *argv[]) {
 
         // Calculate & Update
 
-
-        Point p = BezierCurveRationalWeighted(2, points, weights1, t);
-        p = LinearScale(p, 2.0f, 1.0f);
-        p = ShiftCoordinate(p, 300, 300);
-
-        Point q = BezierCurveRationalWeighted(2, points, weights2, t);
-        q = LinearScale(q, 2.0f, 1.0f);
-        q = ShiftCoordinate(q, 300, 300);
-
-
-        // Draw
-        DrawPoint(*grid, p);
-        DrawPoint(*grid, q);
+        calcAndUpdate(grid, t);
 
         // Render
 
@@ -182,9 +132,6 @@ int main(int argc, const char *argv[]) {
     }
 
     // Clean up
-
     destroy(win,ren);
     delete grid;
-
-    return 0;
 }

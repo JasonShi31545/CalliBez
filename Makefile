@@ -15,9 +15,10 @@ LIBS=-lSDL2 -lm
 
 build:
 	$(CC) *.cc $(CPPFLAGS) -c
-	$(CC) *.o $(LIBS) $(CPPFLAGS) -o test.out
+	$(CC) *.o $(LIBS) $(CPPFLAGS) -o out.out
 
 clean:
+	rm -f *.o
 	rm -f *.out
 
 
