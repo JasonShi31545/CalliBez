@@ -276,12 +276,18 @@ std::tuple<HomogeneousPoint, Point, float> ConstructArc(Point p0, float angle);
 Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Berstein Standardized Rational Quadratic Spline
 Vector2 BSRQV(Point p0, Point p1, Point p2, float w, float t); // BSRQ Velocity
 Vector2 BSRQA(Point p0, Point p1, Point p2, float w, float t); // BSRQ Acceleration
-
-// Currently not required:
-// float BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
-// float BSRQR(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
+float BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
+float BSRQR(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
 
 // Point CircleEllipsePointTangentForm(Point p0, Point p2, Vector2 t0, Vector2 t2); // Use vectors and points to calculate intersections and thus points for projection
+
+
+/* Interpolation */
+
+std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& input);
+std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, std::vector<Point> points);
+
+
 
 // Affine Transformations
 

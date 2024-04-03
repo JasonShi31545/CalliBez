@@ -363,13 +363,135 @@ Point BSRQS(Point p0, Point p1, Point p2, float w, float t) {
  */
 
 Vector2 BSRQV(Point p0, Point p1, Point p2, float w, float t) {
-    // yet to be implemented
-    return Vector2();
+    // im sorry to whomever reading this
+    // im really sorry
+    // i've got no choice
+
+    const float mt = (1 - t);
+    auto part1 = [w, t, mt](float p, float q, float r) {
+        return (-2.0f*p*mt + 2.0f*r*t + 2.0f*q*mt*w - 2.0f*q*t*w) / (mt*mt + t*t + 2.0f*mt*t*w);
+    };
+    auto part2 = [w, t, mt](float p, float q, float r) {
+        return (-2.0f*mt + 2.0f*t + 2.0f*mt*w - 2.0f*t*w) * (p*mt*mt + r*t*t + 2.0f*q*mt*t*w) / powf(mt*mt + t*t + 2.0f*mt*t*w, 2);
+    };
+    float resx = part1(p0.x, p1.x, p2.x) - part2(p0.x, p1.x, p2.x);
+    float resy = part1(p0.y, p1.y, p2.y) - part2(p0.y, p1.y, p2.y);
+
+    return Vector2(resx, resy);
 }
 Vector2 BSRQA(Point p0, Point p1, Point p2, float w, float t) {
-    // yet to be implemented
-    return Vector2();
+    // same as the last function (BSRQV), im really sorry
+    // honestly this one is even messier
+    // coz differentiation sucks
+
+    // four parts to this rational form (╥﹏╥)
+
+    const float mt = (1 - t); // 1.0f - minus t
+    const float bd = (mt*mt + t*t + 2*mt*t*w); // base denominator
+    auto part1 = [w,t,mt,bd](float p, float q, float r) {
+        return (-2.0f) * (-2.0f*mt + 2.0f*t + 2.0f*mt*w - 2.0f*t*w) * (-2.0f*p*mt + 2.0f*r*t + 2.0f*q*mt*w - 2.0f*q*t*w) / (bd * bd);
+    };
+    auto part2 = [w,t,mt,bd](float p, float q, float r) {
+        return (2.0f*p + 2.0f*r - 4.0f*q*w) / (bd);
+    };
+    auto part3 = [w,t,mt,bd](float p, float q, float r) {
+        return 2.0f * powf(-2.0f*mt + 2.0f*t + 2.0f*mt*w - 2.0f*t*w, 2) * (p*mt + r*t*t + 2*q*mt*t*w) / (bd * bd * bd);
+    };
+    auto part4 = [w,t,mt,bd](float p, float q, float r) {
+        return (4.0f - 4.0f*w) * (p*mt + r*t*t + 2*q*mt*t*w) / (bd*bd);
+    };
+
+    float resx = part1(p0.x, p1.x, p2.x) + part2(p0.x, p1.x, p2.x) + part3(p0.x, p1.x, p2.x) - part4(p0.x, p1.x, p2.x);
+    float resy = part1(p0.y, p2.y, p2.y) + part2(p0.y, p2.y, p2.y) + part3(p0.y, p2.y, p2.y) - part4(p0.y, p2.y, p2.y);
+
+    return Vector2(resx, resy);
 }
+
+float BSRQC(Point p0, Point p1, Point p2, float w, float t) {
+    Vector2 v = BSRQV(p0, p1, p2, w, t);
+    Vector2 a = BSRQA(p0, p1, p2, w, t);
+    float det = (v.x * a.y) - (a.x * v.y); // determinant
+    float m = v.magnitude();
+    return det / (m*m*m);
+}
+
+float BSRQR(Point p0, Point p1, Point p2, float w, float t) {
+    return 1.0f / BSRQC(p0, p1, p2, w, t);
+}
+
+// Arguments: https://wikimedia.org/api/rest_v1/media/math/render/svg/946acb6bd31816c61167bac9325e08402929cc97
+// Inspired from https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm and https://www.quantstart.com/articles/Tridiagonal-Matrix-Algorithm-Thomas-Algorithm-in-C/
+
+std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& input) {
+
+    std::vector<float> res(n, 0.0f);
+
+    std::vector<float> c_star(n, 0.0f);
+    std::vector<float> d_star(n, 0.0f);
+    assert(b.size() == n);
+    assert(a.size() == n-1);
+    assert(c.size() == n-1);
+    assert(input.size() == n);
+
+    c_star[0] = c[0] / b[0];
+    d_star[0] = input[0] / b[0];
+
+    for (size_t i = 1; i < n; i++) {
+        float m = 1.0f / (b[i] - a[i] * c_star[i-1]);
+        c_star[i] = c[i] * m;
+        d_star[i] = (input[i] - a[i] * d_star[i-1]) * m;
+    }
+
+    for (size_t i = n - 1; i-- > 0; ) {
+        res[i] = d_star[i] - c_star[i] * input[i+1];
+    }
+
+    return res;
+}
+
+std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, std::vector<Point> points, float A, float B) {
+    // where A is the initial target curvature
+    // and B is the final ending target curvature
+    assert(points.size() == n);
+    std::vector<float> b_diagonal(n, 4.0f);
+    b_diagonal[0] = 2.0f; b_diagonal[b_diagonal.size() - 1] = 7.0f;
+    std::vector<float> a_diagonal(n-1, 1.0f);
+    a_diagonal[a_diagonal.size() - 1] = 2;
+    std::vector<float> c_diagonal(n-1, 1.0f);
+
+    std::vector<float> xs(n), ys(n);
+    for (size_t i = 0; i < n-1; i++) {
+        xs[i] = 2*(2*points[i].x + points[i+1].x);
+        ys[i] = 2*(2*points[i].y + points[i+1].y);
+    }
+    xs[0] = points[0].x + 2*points[1].x - (A / 6.0f);
+    ys[0] = points[0].y + 2*points[1].y - (A / 6.0f);
+    xs[n-1] = 8*points[n-2].x + points[n-1].x - (B / 6.0f);
+    ys[n-1] = 8*points[n-2].y + points[n-1].y - (B / 6.0f);
+
+
+    // processing xs and ys
+
+    // get a_i
+    std::vector<float> rxa(n), rya(n);
+    rxa = Thomas(n, a_diagonal, b_diagonal, c_diagonal, xs);
+    rya = Thomas(n, a_diagonal, b_diagonal, c_diagonal, ys);
+
+    std::vector<float> rxb(n), ryb(n);
+    for (size_t i = 0; i < n-1; i++) {
+        rxb[i] = 2*points[i+1].x - rxa[i+1];
+        ryb[i] = 2*points[i+1].y - rya[i+1];
+    }
+    rxb[n-1] = (0.5f) * (points[n-1].x + rxa[n-1] - (B/6.0f));
+    ryb[n-1] = (0.5f) * (points[n-1].y + rya[n-1] - (B/6.0f));;
+
+    std::vector<std::pair<Point, Point>> control_points(n);
+    for (size_t i = 0; i < n; i++) {
+        control_points[i] = std::make_pair(Point{rxa[i], rya[i]}, Point{rxb[i], ryb[i]});
+    }
+    return control_points;
+}
+
 
 /* Affine Transformations */
 
