@@ -20,6 +20,6 @@ void destroy(SDL_Window *w, SDL_Renderer *r);
 
 void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float));
 
-
+float TimeTransform(float t);
 
 #endif // SETUP_H_

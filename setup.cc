@@ -45,12 +45,26 @@ void destroy(SDL_Window *w, SDL_Renderer *r) {
     SDL_Quit();
 }
 
+float TimeTransform(float t) {
+    //return (1 - expf(-0.5f * t));
+
+    float val = t/(7000.0f);
+    if (val <= 0.0f) {
+        return 0.0f;
+    } else if (val >= 1.0f) {
+        return 1.0f;
+    } else {
+        return val;
+    }
+}
+
 void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
     using namespace std;
 
     // Time Setup
     float t = 0.0f;
     int last_frame_time = SDL_GetTicks();
+    int initial_frame_time = last_frame_time;
     srand(time(NULL));
 
     // Pixel Canvas Setup
@@ -83,7 +97,18 @@ void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
                 break;
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_ESCAPE || event.key.keysym.sym == SDLK_q) {
+                    // quit
                     running = false;
+                }
+                if (event.key.keysym.sym == SDLK_r) {
+                    // reset time
+                    for (size_t i = 0 ; i < W_WIDTH; i++) {
+                        for (size_t j = 0; j < W_HEIGHT; j++) {
+                            (*grid)[i][j] = (uint32_t)0;
+                        }
+                    }
+                    initial_frame_time = last_frame_time;
+                    t = 0.0f;
                 }
                 break;
             default:
@@ -94,12 +119,10 @@ void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 0);
         SDL_RenderClear(ren);
 
-
         // Timing
 
         last_frame_time = SDL_GetTicks();
-
-        t = last_frame_time - 280;
+        t = last_frame_time - initial_frame_time;
         t = TimeTransform(t);
 
         // Calculate & Update

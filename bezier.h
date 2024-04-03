@@ -228,7 +228,6 @@ class Matrix3 {
 
 typedef std::vector<std::vector<uint32_t>> PixelGrid;
 
-float TimeTransform(float t);
 Point lerp(Point s, Point e, float t);
 Point BersteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t);
 Vector2 BersteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t);

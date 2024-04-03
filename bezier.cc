@@ -66,20 +66,6 @@ Matrix3 dot(Matrix3 m1, Matrix3 m2) {
     return res;
 }
 
-float TimeTransform(float t) {
-//    return (1 - expf(-0.05f * t));
-//    return (1 - expf(-0.00005f * t));
-
-    float val = t/(10000.0f);
-    if (val <= 0.0f) {
-        return 0.0f;
-    } else if (val >= 1.0f) {
-        return 1.0f;
-    } else {
-        return val;
-    }
-}
-
 
 Point lerp(Point s, Point e, float t) {
     assert((0.0f <= t) && (t <= 1.0f));
