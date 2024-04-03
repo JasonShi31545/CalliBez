@@ -53,6 +53,27 @@ void Update(PixelGrid *grid, float t) {
     pv = v;
     py = y;
     pz = z;
+
+
+    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[0], 50.0f, 50.0f), 30.0f);
+    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[1], 50.0f, 50.0f), 30.0f);
+    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[2], 50.0f, 50.0f), 30.0f);
+
+
+
+    for (size_t i = 0; i < interpolatedPoints.size() - 1; i++) {
+        Point p0, a, b, p2;
+        p0 = interpolatedPoints[i];
+        p2 = interpolatedPoints[i+1];
+        a = ipOutputs[i * 2 + 0];
+        b = ipOutputs[i * 2 + 1];
+        Point res = BersteinCubicSpline(p0, a, b, p2, t);
+        res = ShiftCoordinate(res, 50.0f, 50.0f);
+        DrawPoint(*grid, res);
+
+    }
+
+
 }
 
 
@@ -78,32 +99,26 @@ int main(int argc, const char *argv[]) {
     pz = py;
 
     interpolatedPoints = {
-        Point{0.0f , 40.0f},
-        Point{5.0f , 50.0f},
-        Point{6.0f , 20.0f},
-        Point{8.0f , 00.0f},
-        Point{12.0f, 80.0f},
-        Point{16.0f, 60.0f},
-        Point{20.0f, 90.0f},
-        Point{22.0f, 70.0f},
-        Point{23.0f, 30.0f},
-        Point{30.0f, 70.0f},
+        Point{200.0f , 300.0f},
+        Point{300.0f, 150.0f},
+        Point{700.0f, 400.0f}
     };
 
 
     std::vector<std::pair<Point, Point>> interpolates = CubicSplineInterpolation(interpolatedPoints.size(), interpolatedPoints, 0.0f, 0.0f);
 
-    ipOutputs.resize(2*interpolatedPoints.size());
-    for (size_t i = 0; i < interpolatedPoints.size(); i++) {
+    ipOutputs.resize(2*(interpolatedPoints.size() - 1));
+    for (size_t i = 0; i < interpolatedPoints.size() - 1; i++) {
         ipOutputs[i*2 + 0] = interpolates[i].first;
         ipOutputs[i*2 + 1] = interpolates[i].second;
     }
 
-    for (size_t i = 0; i < interpolatedPoints.size(); i++) {
-        std::cerr << "Point (" << i << "): " << "x: " << interpolatedPoints[i].x << " y: " << interpolatedPoints[i].y << std::endl;
-        std::cerr << "a (" << i << "): " << "x: " << ipOutputs[i*2 + 0].x << "y: " << ipOutputs[i*2 + 0].y << std::endl;
-        std::cerr << "b (" << i << "): " << "x: " << ipOutputs[i*2 + 1].x << "y: " << ipOutputs[i*2 + 1].y << std::endl;
-    }
+    // for (size_t i = 0; i < interpolatedPoints.size(); i++) {
+    //     std::cerr << "Point (" << i << "): " << "x: " << interpolatedPoints[i].x << " y: " << interpolatedPoints[i].y << std::endl;
+    //     std::cerr << "a (" << i << "): " << "x: " << ipOutputs[i*2 + 0].x << " y: " << ipOutputs[i*2 + 0].y << std::endl;
+    //     std::cerr << "b (" << i << "): " << "x: " << ipOutputs[i*2 + 1].x << " y: " << ipOutputs[i*2 + 1].y << std::endl;
+    // }
+
 
 
 

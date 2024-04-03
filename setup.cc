@@ -123,7 +123,7 @@ void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
 
         last_frame_time = SDL_GetTicks();
         t = last_frame_time - initial_frame_time;
-        t = TimeTransform(t);
+        t = TimeTransform(t/3.0f);
 
         // Calculate & Update
 

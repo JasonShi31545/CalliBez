@@ -95,7 +95,7 @@ void DrawLine(PixelGrid &g, Point s, Point e) {
 
 void DrawCircle(PixelGrid &g, Point o, float radius) {
     float x,y;
-    for (float t = 0.0f; t <= M_2_PIf; t += 0.01f) {
+    for (float t = 0.0f; t <= M_PI*2.0f; t += 0.01f) {
         x = radius*cosf(t) + o.x;
         y = radius*sinf(t) + o.y;
         // DrawPoint(r, Point(x,y));
@@ -408,75 +408,83 @@ float BSRQR(Point p0, Point p1, Point p2, float w, float t) {
 // Arguments: https://wikimedia.org/api/rest_v1/media/math/render/svg/946acb6bd31816c61167bac9325e08402929cc97
 // Inspired from https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm and https://www.quantstart.com/articles/Tridiagonal-Matrix-Algorithm-Thomas-Algorithm-in-C/
 
-std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& input) {
+// https://gist.github.com/cbellei/8ab3ab8551b8dfc8b081c518ccd9ada9
+std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& x) {
 
-    std::vector<float> res(n, 0.0f);
-
-    std::vector<float> c_star(n, 0.0f);
-    std::vector<float> d_star(n, 0.0f);
-    assert(b.size() == n);
     assert(a.size() == n);
+    assert(b.size() == n);
     assert(c.size() == n);
-    assert(a[0] == 0.0f);
-    assert(c[n-1] == 0.0f);
-    assert(input.size() == n);
+    assert(x.size() == n);
 
-    c_star[0] = c[0] / b[0];
-    d_star[0] = input[0] / b[0];
+    using namespace std;
 
-    for (size_t i = 1; i < n; i++) {
-        float m = 1.0f / (b[i] - a[i] * c_star[i-1]);
-        c_star[i] = c[i] * m;
-        d_star[i] = (input[i] - a[i] * d_star[i-1]) * m;
+    vector<float> ac, bc, cc, dc;
+    ac = a; bc = b; cc = c; dc = x;
+    for (size_t it = 1; it < n; it++) {
+        float mc = ac[it-1] / bc[it-1];
+        bc[it] = bc[it] - mc*cc[it-1];
+        dc[it] = dc[it] - mc*dc[it-1];
+    }
+    vector<float> xc = bc;
+    xc[xc.size() - 1] = dc[dc.size() - 1] / bc[bc.size() - 1];
+
+    for (int il = n-5; il >= 0; il--) {
+        xc[il] = (dc[il] - (cc[il] * xc[il+1]))/bc[il];
     }
 
-    for (size_t i = n - 1; i-- > 0; ) {
-        res[i] = d_star[i] - c_star[i] * input[i+1];
-    }
-
-    return res;
+    return xc;
 }
 
 std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, std::vector<Point> points, float A, float B) {
     // where A is the initial target curvature
     // and B is the final ending target curvature
     assert(points.size() == n);
-    std::vector<float> b_diagonal(n, 4.0f);
+    assert(points.size() >= 2);
+
+    // Change n to k because n is too confusing to code
+    // Sorry...
+
+    // there are n-1 pairs of control points for n points
+
+    const size_t k = n-1;
+
+    std::vector<float> b_diagonal(k, 4.0f);
     b_diagonal[0] = 2.0f; b_diagonal[b_diagonal.size() - 1] = 7.0f;
-    std::vector<float> a_diagonal(n, 1.0f);
+    std::vector<float> a_diagonal(k, 1.0f);
     a_diagonal[0] = 0.0f;
     a_diagonal[a_diagonal.size() - 1] = 2;
-    std::vector<float> c_diagonal(n, 1.0f);
+    std::vector<float> c_diagonal(k, 1.0f);
     c_diagonal[c_diagonal.size() - 1] = 0.0f;
 
-    std::vector<float> xs(n), ys(n);
-    for (size_t i = 0; i < n-1; i++) {
+    std::vector<float> xs(k), ys(k);
+    for (size_t i = 0; i < k; i++) {
         xs[i] = 2*(2*points[i].x + points[i+1].x);
         ys[i] = 2*(2*points[i].y + points[i+1].y);
     }
     xs[0] = points[0].x + 2*points[1].x - (A / 6.0f);
     ys[0] = points[0].y + 2*points[1].y - (A / 6.0f);
-    xs[n-1] = 8*points[n-2].x + points[n-1].x - (B / 6.0f);
-    ys[n-1] = 8*points[n-2].y + points[n-1].y - (B / 6.0f);
+    xs[k-1] = 8*points[k-1].x + points[k].x - (B / 6.0f);
+    ys[k-1] = 8*points[k-1].y + points[k].y - (B / 6.0f);
 
 
     // processing xs and ys
 
     // get a_i
-    std::vector<float> rxa(n), rya(n);
-    rxa = Thomas(n, a_diagonal, b_diagonal, c_diagonal, xs);
-    rya = Thomas(n, a_diagonal, b_diagonal, c_diagonal, ys);
+    std::vector<float> rxa(k), rya(k);
+    rxa = Thomas(k, a_diagonal, b_diagonal, c_diagonal, xs);
+    rya = Thomas(k, a_diagonal, b_diagonal, c_diagonal, ys);
 
-    std::vector<float> rxb(n), ryb(n);
-    for (size_t i = 0; i < n-1; i++) {
+
+    std::vector<float> rxb(k), ryb(k);
+    for (size_t i = 0; i < k-1; i++) {
         rxb[i] = 2*points[i+1].x - rxa[i+1];
         ryb[i] = 2*points[i+1].y - rya[i+1];
     }
-    rxb[n-1] = (0.5f) * (points[n-1].x + rxa[n-1] - (B/6.0f));
-    ryb[n-1] = (0.5f) * (points[n-1].y + rya[n-1] - (B/6.0f));;
+    rxb[k-1] = (0.5f) * (points[k].x + rxa[k-1] - (B/6.0f));
+    ryb[k-1] = (0.5f) * (points[k].y + rya[k-1] - (B/6.0f));;
 
-    std::vector<std::pair<Point, Point>> control_points(n);
-    for (size_t i = 0; i < n; i++) {
+    std::vector<std::pair<Point, Point>> control_points(k);
+    for (size_t i = 0; i < k; i++) {
         control_points[i] = std::make_pair(Point{rxa[i], rya[i]}, Point{rxb[i], ryb[i]});
     }
     return control_points;
