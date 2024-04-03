@@ -415,8 +415,10 @@ std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vect
     std::vector<float> c_star(n, 0.0f);
     std::vector<float> d_star(n, 0.0f);
     assert(b.size() == n);
-    assert(a.size() == n-1);
-    assert(c.size() == n-1);
+    assert(a.size() == n);
+    assert(c.size() == n);
+    assert(a[0] == 0.0f);
+    assert(c[n-1] == 0.0f);
     assert(input.size() == n);
 
     c_star[0] = c[0] / b[0];
@@ -441,9 +443,11 @@ std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, st
     assert(points.size() == n);
     std::vector<float> b_diagonal(n, 4.0f);
     b_diagonal[0] = 2.0f; b_diagonal[b_diagonal.size() - 1] = 7.0f;
-    std::vector<float> a_diagonal(n-1, 1.0f);
+    std::vector<float> a_diagonal(n, 1.0f);
+    a_diagonal[0] = 0.0f;
     a_diagonal[a_diagonal.size() - 1] = 2;
-    std::vector<float> c_diagonal(n-1, 1.0f);
+    std::vector<float> c_diagonal(n, 1.0f);
+    c_diagonal[c_diagonal.size() - 1] = 0.0f;
 
     std::vector<float> xs(n), ys(n);
     for (size_t i = 0; i < n-1; i++) {

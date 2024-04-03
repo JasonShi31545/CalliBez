@@ -284,7 +284,7 @@ float BSRQR(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
 /* Interpolation */
 
 std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& input);
-std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, std::vector<Point> points);
+std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, std::vector<Point> points, float A, float B);
 
 
 

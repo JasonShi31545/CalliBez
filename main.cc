@@ -15,6 +15,13 @@ const float SHEAR_X = 2.0f;
 
 const float ROTATE_ANGLE = M_PI_4f;
 
+
+
+std::vector<Point> interpolatedPoints;
+std::vector<Point> ipOutputs;
+
+
+
 void Update(PixelGrid *grid, float t) {
 
     p = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, w, t), SCALE_X, SCALE_Y), ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
@@ -69,6 +76,36 @@ int main(int argc, const char *argv[]) {
     pv = pu;
     py = ShiftCoordinate(LinearRotate(LinearScale(_p0, SCALE_X, SCALE_Y), M_PI_2f), SHIFT_X, SHIFT_Y);
     pz = py;
+
+    interpolatedPoints = {
+        Point{0.0f , 40.0f},
+        Point{5.0f , 50.0f},
+        Point{6.0f , 20.0f},
+        Point{8.0f , 00.0f},
+        Point{12.0f, 80.0f},
+        Point{16.0f, 60.0f},
+        Point{20.0f, 90.0f},
+        Point{22.0f, 70.0f},
+        Point{23.0f, 30.0f},
+        Point{30.0f, 70.0f},
+    };
+
+
+    std::vector<std::pair<Point, Point>> interpolates = CubicSplineInterpolation(interpolatedPoints.size(), interpolatedPoints, 0.0f, 0.0f);
+
+    ipOutputs.resize(2*interpolatedPoints.size());
+    for (size_t i = 0; i < interpolatedPoints.size(); i++) {
+        ipOutputs[i*2 + 0] = interpolates[i].first;
+        ipOutputs[i*2 + 1] = interpolates[i].second;
+    }
+
+    for (size_t i = 0; i < interpolatedPoints.size(); i++) {
+        std::cerr << "Point (" << i << "): " << "x: " << interpolatedPoints[i].x << " y: " << interpolatedPoints[i].y << std::endl;
+        std::cerr << "a (" << i << "): " << "x: " << ipOutputs[i*2 + 0].x << "y: " << ipOutputs[i*2 + 0].y << std::endl;
+        std::cerr << "b (" << i << "): " << "x: " << ipOutputs[i*2 + 1].x << "y: " << ipOutputs[i*2 + 1].y << std::endl;
+    }
+
+
 
     SetupAndLoop(Update);
     return 0;
