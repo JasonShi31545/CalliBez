@@ -428,7 +428,7 @@ std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vect
     vector<float> xc = bc;
     xc[xc.size() - 1] = dc[dc.size() - 1] / bc[bc.size() - 1];
 
-    for (int il = n-5; il >= 0; il--) {
+    for (int il = n-2; il >= 0; il--) {
         xc[il] = (dc[il] - (cc[il] * xc[il+1]))/bc[il];
     }
 
@@ -456,6 +456,7 @@ std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, st
     std::vector<float> c_diagonal(k, 1.0f);
     c_diagonal[c_diagonal.size() - 1] = 0.0f;
 
+
     std::vector<float> xs(k), ys(k);
     for (size_t i = 0; i < k; i++) {
         xs[i] = 2*(2*points[i].x + points[i+1].x);
@@ -466,14 +467,12 @@ std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, st
     xs[k-1] = 8*points[k-1].x + points[k].x - (B / 6.0f);
     ys[k-1] = 8*points[k-1].y + points[k].y - (B / 6.0f);
 
-
     // processing xs and ys
 
     // get a_i
     std::vector<float> rxa(k), rya(k);
     rxa = Thomas(k, a_diagonal, b_diagonal, c_diagonal, xs);
     rya = Thomas(k, a_diagonal, b_diagonal, c_diagonal, ys);
-
 
     std::vector<float> rxb(k), ryb(k);
     for (size_t i = 0; i < k-1; i++) {
@@ -482,6 +481,7 @@ std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, st
     }
     rxb[k-1] = (0.5f) * (points[k].x + rxa[k-1] - (B/6.0f));
     ryb[k-1] = (0.5f) * (points[k].y + rya[k-1] - (B/6.0f));;
+
 
     std::vector<std::pair<Point, Point>> control_points(k);
     for (size_t i = 0; i < k; i++) {

@@ -58,6 +58,7 @@ void Update(PixelGrid *grid, float t) {
     DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[0], 50.0f, 50.0f), 30.0f);
     DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[1], 50.0f, 50.0f), 30.0f);
     DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[2], 50.0f, 50.0f), 30.0f);
+    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[3], 50.0f, 50.0f), 30.0f);
 
 
 
@@ -101,7 +102,8 @@ int main(int argc, const char *argv[]) {
     interpolatedPoints = {
         Point{200.0f , 300.0f},
         Point{300.0f, 150.0f},
-        Point{700.0f, 400.0f}
+        Point{700.0f, 400.0f},
+        Point{800.0f, 75.0f}
     };
 
 
@@ -113,8 +115,7 @@ int main(int argc, const char *argv[]) {
         ipOutputs[i*2 + 1] = interpolates[i].second;
     }
 
-    // for (size_t i = 0; i < interpolatedPoints.size(); i++) {
-    //     std::cerr << "Point (" << i << "): " << "x: " << interpolatedPoints[i].x << " y: " << interpolatedPoints[i].y << std::endl;
+    // for (size_t i = 0; i < interpolatedPoints.size() - 1; i++) {
     //     std::cerr << "a (" << i << "): " << "x: " << ipOutputs[i*2 + 0].x << " y: " << ipOutputs[i*2 + 0].y << std::endl;
     //     std::cerr << "b (" << i << "): " << "x: " << ipOutputs[i*2 + 1].x << " y: " << ipOutputs[i*2 + 1].y << std::endl;
     // }
