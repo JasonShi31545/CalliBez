@@ -62,10 +62,11 @@ void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
     using namespace std;
 
     // Time Setup
-    float t = 0.0f;
-    int last_frame_time = SDL_GetTicks();
-    int initial_frame_time = last_frame_time;
-    srand(time(NULL));
+    //float t = 0.0f;
+    float newt = 0.0f;
+    //int last_frame_time = SDL_GetTicks();
+    //int initial_frame_time = last_frame_time;
+    //srand(time(NULL));
 
     // Pixel Canvas Setup
     PixelGrid *grid = new vector<vector<uint32_t>> ();
@@ -107,8 +108,9 @@ void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
                             (*grid)[i][j] = (uint32_t)0;
                         }
                     }
-                    initial_frame_time = last_frame_time;
-                    t = 0.0f;
+                    //initial_frame_time = last_frame_time;
+                    //t = 0.0f;
+                    newt = 0.0f;
                 }
                 break;
             default:
@@ -121,13 +123,18 @@ void SetupAndLoop(void (*calcAndUpdate)(PixelGrid *,float)) {
 
         // Timing
 
-        last_frame_time = SDL_GetTicks();
-        t = last_frame_time - initial_frame_time;
-        t = TimeTransform(t/3.0f);
+        //last_frame_time = SDL_GetTicks();
+        //t = last_frame_time - initial_frame_time;
+        //t = TimeTransform(t/3.0f);
 
+        if (newt >= 0.0 && newt < 1.0f) {
+            newt += 0.01f;
+        } else {
+            newt = 1.0f;
+        }
         // Calculate & Update
 
-        calcAndUpdate(grid, t);
+        calcAndUpdate(grid, newt);
 
         // Render
 

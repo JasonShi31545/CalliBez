@@ -55,10 +55,9 @@ void Update(PixelGrid *grid, float t) {
     pz = z;
 
 
-    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[0], 50.0f, 50.0f), 30.0f);
-    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[1], 50.0f, 50.0f), 30.0f);
-    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[2], 50.0f, 50.0f), 30.0f);
-    DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[3], 50.0f, 50.0f), 30.0f);
+    for (size_t i = 0; i < interpolatedPoints.size(); i++) {
+        DrawCircle(*grid, ShiftCoordinate(interpolatedPoints[i], 50.0f, 50.0f), 30.0f);
+    }
 
 
 
@@ -103,7 +102,8 @@ int main(int argc, const char *argv[]) {
         Point{200.0f , 300.0f},
         Point{300.0f, 150.0f},
         Point{700.0f, 400.0f},
-        Point{800.0f, 75.0f}
+        Point{800.0f, 75.0f},
+        Point{900.0f, 400.0f}
     };
 
 
