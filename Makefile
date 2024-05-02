@@ -5,10 +5,10 @@
 # @version 0.1
 
 CC=g++
-CPPFLAGS=-std=c++17 -Wall -Wpedantic -g -fsanitize=address -fsanitize=undefined -D_GLIBCXX_DEBUG -O0 -Wno-unused-result
+CPPFLAGS=-std=c++17 -Wall -Wpedantic -g -fsanitize=address -fsanitize=undefined -D_GLIBCXX_DEBUG -O0 -Wno-unused-result -fstack-protector
 LIBS=-lSDL2 -lm
 
-PROD_CPPFLAGS=-std=c++17 -Wall -Wpedantic -O2 -Wno-unused-result -s
+PROD_CPPFLAGS=-std=c++17 -Wall -Wpedantic -O2 -Wno-unused-result -fstack-protector -s
 PROD_LIBS=-lSDL2 -lm
 
 # %: %.cc

@@ -43,6 +43,7 @@
 *.pptx
 *.svg
 *.jpg
+.gdb_history
 
 # Custom directories
 bcurves/
