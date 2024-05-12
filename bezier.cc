@@ -130,7 +130,7 @@ void DrawWidth(PixelGrid &g, Point o, Vector2 v, float w) {
     }
 }
 
-Point BersteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t) {
+Point BernsteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t) {
     float x,y;
     float s,c;
     s = t*t;
@@ -140,7 +140,7 @@ Point BersteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t) {
     return Point(x,y);
 }
 
-Vector2 BersteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t) {
+Vector2 BernsteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t) {
     float x,y;
     float s;
     s = t*t;
@@ -150,16 +150,28 @@ Vector2 BersteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t) {
 }
 
 
-Vector2 BersteinCubicAcceleration(Point p0, Point p1, Point p2, Point p3, float t) {
+Vector2 BernsteinCubicAcceleration(Point p0, Point p1, Point p2, Point p3, float t) {
     float x,y;
     x = p0.x * (6 - 6*t) + p1.x * (-12 + 18*t) + p2.x * (6-18*t) + p3.x * (6*t);
     y = p0.y * (6 - 6*t) + p1.y * (-12 + 18*t) + p2.y * (6-18*t) + p3.y * (6*t);
     return Vector2(x,y);
 }
 
+Point BernsteinQuarticSpline(Point p0, Point p1, Point p2, Point p3, Point p4, float t) {
+    float x,y;
+    float com = 1-t;
+    x = p0.x * (com*com*com*com) + 4*(com*com*com)*t*p1.x + 6*(com*com)*t*t*p2.x + 4*(com)*t*t*t*p3.x + t*t*t*t*p4.x;
+    y = p0.y * (com*com*com*com) + 4*(com*com*com)*t*p1.y + 6*(com*com)*t*t*p2.y + 4*(com)*t*t*t*p3.y + t*t*t*t*p4.y;
+    return Point(x,y);
+}
+
+Point Opposing(Point o, Point p) {
+    return Point{o.x - (p.x - o.x), o.y - (p.y - o.y)};
+}
+
 float Curvature(Point p0, Point p1, Point p2, Point p3, float t) {
-    Vector2 v = BersteinCubicVelocity(p0, p1, p2, p3, t);
-    Vector2 a = BersteinCubicAcceleration(p0, p1, p2, p3, t);
+    Vector2 v = BernsteinCubicVelocity(p0, p1, p2, p3, t);
+    Vector2 a = BernsteinCubicAcceleration(p0, p1, p2, p3, t);
     float det = (v.x * a.y) - (a.x * v.y); // determinant
     float m = v.magnitude();
     return det / (m*m*m);
@@ -188,7 +200,7 @@ unsigned int choose(unsigned int n, unsigned int k) {
     return res / factorial(k);
 }
 
-float BersteinCoefficient(unsigned int n, unsigned int i, float t) {
+float BernsteinCoefficient(unsigned int n, unsigned int i, float t) {
     return choose(n,i) * expf(logf(t) * (float)i) * expf(logf(1-t) * (float)(n-i));
 }
 
@@ -196,8 +208,8 @@ Point BezierCurveUnweightedN(unsigned int n, std::vector<Point> points, float t)
     assert(points.size() == n+1);
     float resx = 0, resy = 0;
     for (unsigned int i = 0; i <= n; i++) {
-        resx += BersteinCoefficient(n, i, t) * points[i].x;
-        resy += BersteinCoefficient(n, i, t) * points[i].y;
+        resx += BernsteinCoefficient(n, i, t) * points[i].x;
+        resy += BernsteinCoefficient(n, i, t) * points[i].y;
     }
     return Point(resx, resy);
 }
@@ -207,8 +219,8 @@ Point BezierCurveWeightedN(unsigned int n, std::vector<Point> points, std::vecto
     assert(weights.size() == n+1);
     float resx = 0, resy = 0;
     for (unsigned int i = 0; i <= n; i++) {
-        resx += BersteinCoefficient(n, i, t) * points[i].x * weights[i];
-        resy += BersteinCoefficient(n, i, t) * points[i].y * weights[i];
+        resx += BernsteinCoefficient(n, i, t) * points[i].x * weights[i];
+        resy += BernsteinCoefficient(n, i, t) * points[i].y * weights[i];
     }
     return Point(resx, resy);
 }
@@ -219,7 +231,7 @@ Point BezierCurveRationalWeighted(unsigned int n, std::vector<Point> points, std
     float resx = 0, resy = 0;
     float den = 0;
     for (unsigned int i = 0; i <= n; i++) {
-        float bc = BersteinCoefficient(n, i, t) * weights[i];
+        float bc = BernsteinCoefficient(n, i, t) * weights[i];
         den += bc;
         resx += bc * points[i].x;
         resy += bc * points[i].y;

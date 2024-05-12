@@ -1,9 +1,12 @@
 #include "setup.h"
 
-Point pp, pq, pr, ps, pu, pv, py, pz;
-Point p, q, r, s, u, v, y, z;
+Point pp, pq;
+Point p,q;
 Point _p0, _p1, _p2;
 float w;
+
+Point a,b,c;
+Point t11,t12,t13;
 
 const float SHIFT_X = W_WIDTH/2.0f;
 const float SHIFT_Y = W_HEIGHT/2.0f;
@@ -27,32 +30,12 @@ void Update(PixelGrid *grid, float t) {
     p = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, w, t), SCALE_X, SCALE_Y), ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
     q = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, -w, t), SCALE_X, SCALE_Y), ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
 
-    r = ShiftCoordinate(LinearScale(BSRQS(_p0, _p1, _p2, w, t), SCALE_X, SCALE_Y), SHIFT_X, SHIFT_Y);
-    s = ShiftCoordinate(LinearScale(BSRQS(_p0, _p1, _p2, -w, t), SCALE_X, SCALE_Y), SHIFT_X, SHIFT_Y);
-
-    u = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, w, t), SCALE_X, SCALE_Y), -ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
-    v = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, -w, t), SCALE_X, SCALE_Y), -ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
-
-    y = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, w, t), SCALE_X, SCALE_Y), M_PI_2f), SHIFT_X, SHIFT_Y);
-    z = ShiftCoordinate(LinearRotate(LinearScale(BSRQS(_p0, _p1, _p2, -w, t), SCALE_X, SCALE_Y), M_PI_2f), SHIFT_X, SHIFT_Y);
 
     DrawLine(*grid, p, pp);
     DrawLine(*grid, q, pq);
-    DrawLine(*grid, r, pr);
-    DrawLine(*grid, s, ps);
-    DrawLine(*grid, u, pu);
-    DrawLine(*grid, v, pv);
-    DrawLine(*grid, y, py);
-    DrawLine(*grid, z, pz);
 
     pp = p;
     pq = q;
-    pr = r;
-    ps = s;
-    pu = u;
-    pv = v;
-    py = y;
-    pz = z;
 
 
     for (size_t i = 0; i < interpolatedPoints.size(); i++) {
@@ -67,12 +50,11 @@ void Update(PixelGrid *grid, float t) {
         p2 = interpolatedPoints[i+1];
         a = ipOutputs[i * 2 + 0];
         b = ipOutputs[i * 2 + 1];
-        Point res = BersteinCubicSpline(p0, a, b, p2, t);
+        Point res = BernsteinCubicSpline(p0, a, b, p2, t);
         res = ShiftCoordinate(res, 50.0f, 50.0f);
         DrawPoint(*grid, res);
 
     }
-
 
 }
 
@@ -91,12 +73,6 @@ int main(int argc, const char *argv[]) {
 
     pp = ShiftCoordinate(LinearRotate(LinearScale(_p0, SCALE_X, SCALE_Y), ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
     pq = pp;
-    pr = ShiftCoordinate(LinearScale(_p0, SCALE_X, SCALE_Y), SHIFT_X, SHIFT_Y);
-    ps = pr;
-    pu = ShiftCoordinate(LinearRotate(LinearScale(_p0, SCALE_X, SCALE_Y), -ROTATE_ANGLE), SHIFT_X, SHIFT_Y);
-    pv = pu;
-    py = ShiftCoordinate(LinearRotate(LinearScale(_p0, SCALE_X, SCALE_Y), M_PI_2f), SHIFT_X, SHIFT_Y);
-    pz = py;
 
     interpolatedPoints = {
         Point{200.0f , 300.0f},
@@ -119,6 +95,27 @@ int main(int argc, const char *argv[]) {
     //     std::cerr << "a (" << i << "): " << "x: " << ipOutputs[i*2 + 0].x << " y: " << ipOutputs[i*2 + 0].y << std::endl;
     //     std::cerr << "b (" << i << "): " << "x: " << ipOutputs[i*2 + 1].x << " y: " << ipOutputs[i*2 + 1].y << std::endl;
     // }
+
+
+    a = Point(5.244f, 1.943);
+    b = Point(4.931f, 1.499f);
+    c = Point(4.6f, 1.05f);
+
+
+    t11 = Point(0.0f, 0.0f);
+    t12 = Point(0.5f, (6.0f/16.0f));
+    t13 = Point(1.0f, 0.0f);
+
+    a = LinearScale(a, 10, 10);
+    b = LinearScale(b, 10, 10);
+    c = LinearScale(c, 10, 10);
+
+    t11 = LinearScale(t11, 10, 10);
+    t12 = LinearScale(t12, 10, 10);
+    t13 = LinearScale(t13, 10, 10);
+
+    auto rline = CubicSplineInterpolation(3, {a,b,c}, 3, 3);
+
 
 
 

@@ -229,16 +229,20 @@ class Matrix3 {
 typedef std::vector<std::vector<uint32_t>> PixelGrid;
 
 Point lerp(Point s, Point e, float t);
-Point BersteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t);
-Vector2 BersteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t);
-Vector2 BersteinCubicAcceleration(Point p0, Point p1, Point p2, Point p3, float t);
+Point BernsteinCubicSpline(Point p0, Point p1, Point p2, Point p3, float t);
+Vector2 BernsteinCubicVelocity(Point p0, Point p1, Point p2, Point p3, float t);
+Vector2 BernsteinCubicAcceleration(Point p0, Point p1, Point p2, Point p3, float t);
 float Curvature(Point p0, Point p1, Point p2, Point p3, float t);
 float Radius(Point p0, Point p1, Point p2, Point p3, float t);
 unsigned int choose(unsigned int n, unsigned int k);
-float BersteinCoefficient(unsigned int n, unsigned int i, float t);
+float BernsteinCoefficient(unsigned int n, unsigned int i, float t);
 Point BezierCurveUnweightedN(unsigned int n, std::vector<Point> points, float t);
 Point BezierCurveWeightedN(unsigned int n, std::vector<Point> points, std::vector<float> weights, float t);
 Point BezierCurveRationalWeighted(unsigned int n, std::vector<Point> points, std::vector<float> weights, float t);
+
+Point BernsteinQuarticSpline(Point p0, Point p1, Point p2, Point p3, Point p4, float t); // for thickness
+
+Point Opposing(Point o, Point p);
 
 Vector2 NormalizeV2(Vector2 v);
 float AngleV2(Vector2 v);
@@ -272,7 +276,7 @@ float StandardizeWeight(float w0, float w1, float w2);
 std::tuple<HomogeneousPoint, Point, float> ConstructArc(Point p0, float angle);
 
 
-Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Berstein Standardized Rational Quadratic Spline
+Point BSRQS(Point p0, Point p1, Point p2, float w, float t); // Bernstein Standardized Rational Quadratic Spline
 Vector2 BSRQV(Point p0, Point p1, Point p2, float w, float t); // BSRQ Velocity
 Vector2 BSRQA(Point p0, Point p1, Point p2, float w, float t); // BSRQ Acceleration
 float BSRQC(Point p0, Point p1, Point p2, float w, float t); // BSRQ Curvature
