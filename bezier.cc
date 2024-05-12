@@ -169,6 +169,27 @@ Point Opposing(Point o, Point p) {
     return Point{o.x - (p.x - o.x), o.y - (p.y - o.y)};
 }
 
+template <typename T>
+T TruncateCurve(std::vector<Curve<T>> curves, float t) {
+    assert(curves.size() < 50); // stability purposes
+    float fraction = t / (float)curves.size();
+    for (size_t i = 0; i < curves.size(); i++) {
+        if (t < ((i+1) * fraction) && t >= (i * fraction)) {
+            return (curves[i])(t - (i * fraction));
+        }
+    }
+    return T(-1,-1);
+}
+
+
+/* Explicit instantiation for the linker */
+template class Curve<Point>;
+template Point TruncateCurve(std::vector<Curve<Point>> curves, float t);
+
+template class Curve<Vector2>;
+template Vector2 TruncateCurve(std::vector<Curve<Vector2>> curves, float t);
+
+
 float Curvature(Point p0, Point p1, Point p2, Point p3, float t) {
     Vector2 v = BernsteinCubicVelocity(p0, p1, p2, p3, t);
     Vector2 a = BernsteinCubicAcceleration(p0, p1, p2, p3, t);

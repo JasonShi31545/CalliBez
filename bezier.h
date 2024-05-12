@@ -244,6 +244,32 @@ Point BernsteinQuarticSpline(Point p0, Point p1, Point p2, Point p3, Point p4, f
 
 Point Opposing(Point o, Point p);
 
+template<typename T>
+class Curve {
+public:
+    using CurveFn = std::function<T(float)>;
+    Curve(CurveFn func) : _func {std::move(func)} {}
+    CurveFn _func;
+    T operator()(float t) {
+        return _func(t);
+    }
+};
+
+// class VCurve {
+// public:
+//     using CurveFn = std::function<Vector2(float)>;
+//     VCurve(CurveFn func) : _func { std::move(func) } {}
+//     CurveFn _func;
+//     Vector2 operator()(float t) {
+//         return _func(t);
+//     }
+// };
+
+template <typename T>
+T TruncateCurve(std::vector<Curve<T>> curves, float t);
+
+// Vector2 TruncateVCurve(std::vector<VCurve> curves, float t);
+
 Vector2 NormalizeV2(Vector2 v);
 float AngleV2(Vector2 v);
 Vector2 RotateV2(Vector2 v, float angle);

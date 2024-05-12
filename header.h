@@ -11,6 +11,8 @@
 
 // C++
 #include <bits/stdc++.h>
+#include <functional>
+#include <utility>
 
 // SDL
 #include <SDL2/SDL.h>
