@@ -401,19 +401,20 @@ void Update(PixelGrid *grid, float t) {
 
     if (drawn) return;
     fps = Fpoints();
-    // eps = Epoints();
-    // aps = Apoints();
-    // rps = Rpoints();
+    eps = Epoints();
+    aps = Apoints();
+    rps = Rpoints();
     fws = Fweights();
-    // ews = Eweights();
-    // aws = Aweights();
-    // rws = Rweights();
+    ews = Eweights();
+    aws = Aweights();
+    rws = Rweights();
 
     Draw(grid, t, fps, fws, 2.0f, 100.0f, 100.0f, -30, 30, 'F');
-    // Draw(grid, t, fps, fws, 2.0f, 100.0f, 100.0f, -30, 30);
-    // Draw(grid, t, eps, 100.0f, 100.0f, -30, 30);
-    // Draw(grid, t, aps, 100.0f, 100.0f, -30, 30);
-    // Draw(grid, t, rps, 200.0f, 200.0f, -30, -200);
+    // Draw(grid, t, eps, ews, 2.0f, 100.0f, 100.0f, -30, 30, 'E');
+    // Draw(grid, t, aps, aws, 2.0f, 100.0f, 100.0f, -30, 30, 'A');
+    // Draw(grid, t, rps, rws, 2.0f, 100.0f, 100.0f, -30, 30, 'R');
+
+
 
 
     drawn = true;
