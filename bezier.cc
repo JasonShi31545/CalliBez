@@ -172,13 +172,18 @@ Point Opposing(Point o, Point p) {
 template <typename T>
 T TruncateCurve(std::vector<Curve<T>> curves, float t) {
     assert(curves.size() < 50); // stability purposes
-    float fraction = t / (float)curves.size();
-    for (size_t i = 0; i < curves.size(); i++) {
-        if (t < ((i+1) * fraction) && t >= (i * fraction)) {
-            return (curves[i])(t - (i * fraction));
-        }
-    }
-    return T(-1,-1);
+    // t = std::round(t * 100) / 100.0f;
+    // float fraction = t / (float)curves.size();
+    // for (size_t i = 0; i < curves.size(); i++) {
+    //     if (t < ((float)(i+1) * fraction) && t >= ((float)i * fraction)) {
+    //         return (curves[i])(t - ((float)i * fraction));
+    //     }
+    // }
+    // return (curves[0])(t);
+    const float frac = 1.0f / (float)curves.size();
+    int index = (int)(t / frac);
+    return (curves[index])((float)curves.size() * (t - ((float)index * frac)));
+
 }
 
 

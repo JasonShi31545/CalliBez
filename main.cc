@@ -278,7 +278,7 @@ vector<vector<Point>> Rweights() {
 
 void Draw(PixelGrid *grid, float t, vector<vector<Point>> &ps, vector<vector<Point>> &ws, float wf, float scalex, float scaley, float shiftx, float shifty, char ch) {
 
-    for (float tmp = 0.0f; tmp < 1.0f; tmp += 0.05f) {
+    for (float tmp = 0.0f; tmp < 1.0f; tmp += 0.005f) {
         Point o,e,p1,p2;
         float width;
 
@@ -376,6 +376,9 @@ void Draw(PixelGrid *grid, float t, vector<vector<Point>> &ps, vector<vector<Poi
             curve = TruncateCurve(pointCurves, tmp);
             velocity = TruncateCurve(vectorCurves, tmp);
 
+            cerr << "X: " << curve.x << " Y: " << curve.y << endl;
+            cerr << "VX: " << velocity.x << " VY: " << velocity.y << endl;
+
             DrawWidth(*grid, curve, velocity, width);
 
             // for (size_t i = 0; i < st.size(); i+=3) {
@@ -410,9 +413,9 @@ void Update(PixelGrid *grid, float t) {
     rws = Rweights();
 
     Draw(grid, t, fps, fws, 2.0f, 100.0f, 100.0f, -30, 30, 'F');
-    // Draw(grid, t, eps, ews, 2.0f, 100.0f, 100.0f, -30, 30, 'E');
-    // Draw(grid, t, aps, aws, 2.0f, 100.0f, 100.0f, -30, 30, 'A');
-    // Draw(grid, t, rps, rws, 2.0f, 100.0f, 100.0f, -30, 30, 'R');
+    Draw(grid, t, eps, ews, 2.0f, 100.0f, 100.0f, -30, 30, 'E');
+    Draw(grid, t, aps, aws, 2.0f, 100.0f, 100.0f, -30, 30, 'A');
+    Draw(grid, t, rps, rws, 2.0f, 100.0f, 100.0f, -30, 30, 'R');
 
 
 
