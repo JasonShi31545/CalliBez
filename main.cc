@@ -454,18 +454,16 @@ void Update(PixelGrid *grid, float t) {
 
 int main(void) {
 
-    Point A = Point{7.339,2.928};
-    Point B = Point{7.076,2.455};
-    Point C = Point{6.466,2.046};
-    Point D = Point{6.69,2.087};
-    Point E = Point{7.02,2.088};
+    Point A = Point{1.48,5.756};
+    Point B = Point{1.317,5.515};
+    Point C = Point{1.108,5.296};
 
-    vector<Point> interpoints = {A,B,C,D,E};
+    vector<Point> interpoints = {A,B,C};
 
-    auto interpolate = CubicSplineInterpolation(5, interpoints, 0,0);
+    auto interpolate = CubicSplineInterpolation(interpoints.size(), interpoints, 0,0);
 
     vector<Point> finalpoints;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < interpoints.size()-1; i++) {
         finalpoints.push_back(interpoints[i]);
         finalpoints.push_back(interpolate[i].first);
         finalpoints.push_back(interpolate[i].second);
