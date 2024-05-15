@@ -34,7 +34,7 @@
 
 # Custom
 .*.~undo-tree~
-*.png
+#*.png
 *.ggb
 *.nb
 *.tex
@@ -46,7 +46,9 @@
 .gdb_history
 
 # Custom directories
+notes/
 bcurves/
 rose-hulman-notes/
 python_tests/
 research_docs/
+resources/
