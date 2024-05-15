@@ -1,9 +1,11 @@
 # CalliBez
 Bézier Curve Copperplate Calligraphy Visualisation
 
-![F][readme_resources/F.png "Letter A"]
-![E][readme_resources/E.png "Letter A"]
-![A][readme_resources/A.png "Letter A"]
-![R][readme_resources/R.png "Letter A"]
+### Some letters
+<img src="readme_resources/F.png"/>
+<img src="readme_resources/E.png"/>
+<img src="readme_resources/A.png"/>
+<img src="readme_resources/R.png"/>
 
-![frame][readme_resources/screenshot.png "Sample Frame Output"]
+## Sample Frame Output
+<img src="readme_resources/screenshot.png"/>
