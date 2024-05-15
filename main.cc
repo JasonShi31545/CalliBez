@@ -463,7 +463,7 @@ int main(void) {
     auto interpolate = CubicSplineInterpolation(interpoints.size(), interpoints, 0,0);
 
     vector<Point> finalpoints;
-    for (int i = 0; i < interpoints.size()-1; i++) {
+    for (size_t i = 0; i < interpoints.size()-1; i++) {
         finalpoints.push_back(interpoints[i]);
         finalpoints.push_back(interpolate[i].first);
         finalpoints.push_back(interpolate[i].second);
