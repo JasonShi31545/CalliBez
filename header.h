@@ -17,4 +17,7 @@
 // SDL
 #include <SDL2/SDL.h>
 
+// Eigen
+#include <Eigen/Dense>
+
 #endif // HEADER_H

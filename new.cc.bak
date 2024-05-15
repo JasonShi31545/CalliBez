@@ -42,7 +42,7 @@ int main(void) {
         q = finalpoints[i+1];
         r = finalpoints[i+2];
         s = finalpoints[i+3];
-        todraw.push_back(Curve<Point>([p,q,r,s](float t) { return LinearScale(BernsteinCubicSpline(p, q, r, s, t), 80.0, 80.0);}));
+        todraw.push_back(Curve<Point>([p,q,r,s](float t) { return LinearScale(BernsteinCubicSpline(p, q, r, s, t), 50.0, 50.0);}));
     }
 
 

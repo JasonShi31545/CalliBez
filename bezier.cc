@@ -447,30 +447,50 @@ float BSRQR(Point p0, Point p1, Point p2, float w, float t) {
 // Inspired from https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm and https://www.quantstart.com/articles/Tridiagonal-Matrix-Algorithm-Thomas-Algorithm-in-C/
 
 // https://gist.github.com/cbellei/8ab3ab8551b8dfc8b081c518ccd9ada9
-std::vector<float> Thomas(size_t n, const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& x) {
+std::vector<float> Thomas(size_t n, const std::vector<float>& aa, const std::vector<float>& bb, const std::vector<float>& cc, const std::vector<float>& xx) {
 
-    assert(a.size() == n);
-    assert(b.size() == n);
-    assert(c.size() == n);
-    assert(x.size() == n);
+    Eigen::MatrixXf A(n,n);
+    Eigen::VectorXf b(n);
 
-    using namespace std;
+    // vector is xx
+    // matrix is a b c
+    std::vector<std::vector<float>> combined(n, std::vector<float>(n, 0.0f));
 
-    vector<float> ac, bc, cc, dc;
-    ac = a; bc = b; cc = c; dc = x;
-    for (size_t it = 1; it < n; it++) {
-        float mc = ac[it-1] / bc[it-1];
-        bc[it] = bc[it] - mc*cc[it-1];
-        dc[it] = dc[it] - mc*dc[it-1];
+    size_t iid = 0;
+    for (size_t i = 1; i <= n-2; i++) {
+        combined[i][iid] = aa[i];
+        combined[i][iid + 1] = bb[i];
+        combined[i][iid+2] = cc[i];
+        iid++;
     }
-    vector<float> xc = bc;
-    xc[xc.size() - 1] = dc[dc.size() - 1] / bc[bc.size() - 1];
+    combined[0][0] = bb[0];
+    combined[0][1] = cc[0];
+    combined[n-1][n-1] = bb[n-1];
+    combined[n-1][n-2] = aa[n-1];
 
-    for (int il = n-2; il >= 0; il--) {
-        xc[il] = (dc[il] - (cc[il] * xc[il+1]))/bc[il];
+    for (size_t i = 0; i < combined.size(); i++) {
+        for (size_t j = 0; j < combined.size(); j++) {
+            A(i,j) = combined[i][j];
+        }
+    }
+    for (size_t i = 0; i < xx.size(); i++) {
+        b(i) = xx[i];
     }
 
-    return xc;
+    Eigen::VectorXf res = A.colPivHouseholderQr().solve(b);
+
+    std::vector<float> sol(n);
+    for (size_t i = 0; i < n; i++) {
+        sol[i] = res[i];
+    }
+
+    // std::cerr << "Thomas Sol" << std::endl;
+    // for (size_t i = 0; i < n; i++) {
+    //     std::cerr << sol[i] << ", ";
+    // }
+    // std::cerr << std::endl;
+
+    return sol;
 }
 
 std::vector<std::pair<Point, Point>> CubicSplineInterpolation(const size_t n, std::vector<Point> points, float A, float B) {
