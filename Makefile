@@ -8,6 +8,7 @@ CC=g++
 CPPFLAGS=-std=c++17 -Wall -Wpedantic -g -fsanitize=address -fsanitize=undefined -D_GLIBCXX_DEBUG -O0 -Wno-unused-result -fstack-protector
 INCLUDES=-I/usr/include/eigen3
 LIBS=-lSDL2 -lm
+DEFS=-DTESTING
 
 PROD_CPPFLAGS=-std=c++17 -Wall -Wpedantic -O2 -Wno-unused-result -fstack-protector -s
 
@@ -17,11 +18,11 @@ PROD_CPPFLAGS=-std=c++17 -Wall -Wpedantic -O2 -Wno-unused-result -fstack-protect
 .DEFAULT_GOAL := debug
 
 debug:
-	$(CC) *.cc $(INCLUDES) $(CPPFLAGS) -c
+	$(CC) *.cc $(INCLUDES) $(CPPFLAGS) $(DEFS) -c
 	$(CC) *.o $(LIBS) $(CPPFLAGS) -o db.out
 
 prod:
-	$(CC) *.cc $(INCLUDES) $(PROD_CPPFLAGS) -c
+	$(CC) *.cc $(INCLUDES) $(PROD_CPPFLAGS) $(DEFS) -c
 	$(CC) *.o $(LIBS) $(PROD_CPPFLAGS) -o prod.out
 
 clean:
